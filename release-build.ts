@@ -1,6 +1,6 @@
 /// <reference types="node"/>
 import { join } from 'path';
-import { rm, cp } from 'fs/promises';
+import { rm, cp, readFile, writeFile } from 'fs/promises';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { globSync as glob } from 'tinyglobby';
@@ -31,41 +31,48 @@ const args = yargs(hideBin(process.argv))
     forwardStderrToParent: true,
   });
 
-  // Copy the package.json into `dist`.
-  cp(join(root, 'package.json'), join(targetDirectory, 'package.json'));
+  // Generate the package.json.
+  await writeFile(
+    join(targetDirectory, 'package.json'),
+    await getPackageJson(join(root, 'package.json'))
+  );
 
   // Copy the readme.
-  cp(join(root, 'README.md'), join(targetDirectory, 'README.md'));
+  await cp(join(root, 'README.md'), join(targetDirectory, 'README.md'));
 
   // Copy all the examples as is.
-  glob('**/*', {
-    cwd: join(root, 'examples'),
-    dot: true,
-    ignore: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/.vinxi/**',
-      '**/.output/**',
-    ],
-  }).forEach((agentFile) => {
-    cp(
-      join(root, 'examples', agentFile),
-      join(targetDirectory, 'examples', agentFile)
-    );
-  });
+  await Promise.all(
+    glob('**/*', {
+      cwd: join(root, 'examples'),
+      dot: true,
+      ignore: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/.vinxi/**',
+        '**/.output/**',
+      ],
+    }).map((agentFile) =>
+      cp(
+        join(root, 'examples', agentFile),
+        join(targetDirectory, 'examples', agentFile)
+      )
+    )
+  );
 
   // The user journey testing requires various files to work.
   // Copy everything except the source TypeScript.
-  glob('**/*', {
-    cwd: join(root, browserAgentRelativePath),
-    dot: true,
-    ignore: ['*.ts', 'README.md'],
-  }).forEach((agentFile) => {
-    cp(
-      join(root, browserAgentRelativePath, agentFile),
-      join(targetDirectory, browserAgentRelativePath, agentFile)
-    );
-  });
+  await Promise.all(
+    glob('**/*', {
+      cwd: join(root, browserAgentRelativePath),
+      dot: true,
+      ignore: ['*.ts', 'README.md'],
+    }).map((agentFile) =>
+      cp(
+        join(root, browserAgentRelativePath, agentFile),
+        join(targetDirectory, browserAgentRelativePath, agentFile)
+      )
+    )
+  );
 
   if (!args.runnerOnly) {
     // Build the report app and server.
@@ -81,3 +88,17 @@ const args = yargs(hideBin(process.argv))
 
   // TODO: also have `npm publish` here?
 })();
+
+async function getPackageJson(path: string): Promise<string> {
+  const content = await readFile(path, 'utf8');
+  const parsed = JSON.parse(content) as {
+    scripts?: unknown;
+    devDependencies?: unknown;
+  };
+
+  // Delete some fields that aren't relevant for end users.
+  delete parsed.scripts;
+  delete parsed.devDependencies;
+
+  return JSON.stringify(parsed, undefined, 2);
+}
