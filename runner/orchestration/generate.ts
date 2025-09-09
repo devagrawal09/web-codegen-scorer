@@ -43,6 +43,7 @@ import { logReportHeader } from '../reporting/report-logging.js';
 import { DynamicProgressLogger } from '../progress/dynamic-progress-logger.js';
 import { UserFacingError } from '../utils/errors.js';
 import { getRunGroupId } from './grouping.js';
+import { executeCommand } from '../utils/exec.js';
 
 /**
  * Orchestrates the entire assessment process for each prompt defined in the `prompts` array.
@@ -107,6 +108,9 @@ export async function generateCodeAndAssess(options: {
   }
 
   logReportHeader(env, promptsToProcess.length, appConcurrency, options);
+
+  // We need Chrome to collect runtime information.
+  await installChrome();
 
   if (
     options.startMcp &&
@@ -645,6 +649,24 @@ function getCandidateExecutablePrompts(
   // Otherwise only filter by name, but don't shuffle since
   // the user appears to be targeting a specific prompt.
   return result.filter(({ name }) => name.includes(promptFilter));
+}
+
+let chromeInstallPromise: Promise<unknown> | null = null;
+
+/** Installs Chrome which is necessary for runtime checks. */
+async function installChrome(): Promise<void> {
+  // Ensure that Chrome is installed. Note that the
+  // installation is global so we can reuse the promise.
+  if (!chromeInstallPromise) {
+    chromeInstallPromise = executeCommand(
+      'npx puppeteer browsers install chrome',
+      process.cwd()
+    );
+  }
+
+  try {
+    await chromeInstallPromise;
+  } catch {}
 }
 
 /**
