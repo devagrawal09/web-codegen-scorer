@@ -7,6 +7,7 @@ import {
 import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
 import angularTs from '@shikijs/langs/angular-ts';
 import githubLight from '@shikijs/themes/github-light';
+import githubDark from '@shikijs/themes/github-dark';
 
 @Injectable({ providedIn: 'root' })
 export class CodeHighligher implements OnDestroy {
@@ -25,7 +26,7 @@ export class CodeHighligher implements OnDestroy {
     if (!this.cachedHighligher) {
       const engine = await createOnigurumaEngine(import('shiki/wasm'));
       this.cachedHighligher = createHighlighterCoreSync({
-        themes: [githubLight],
+        themes: [githubLight, githubDark],
         langs: [angularTs],
         engine,
       });

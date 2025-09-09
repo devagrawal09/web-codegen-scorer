@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { CodeHighligher } from '../services/code-highligher';
+import { AppColorMode } from '../services/app-color-mode';
 
 @Component({
   selector: 'app-code-viewer',
@@ -41,6 +42,7 @@ import { CodeHighligher } from '../services/code-highligher';
 })
 export class CodeViewer {
   private highlighter = inject(CodeHighligher);
+  private colorService = inject(AppColorMode);
   protected formatedCode = signal<SafeHtml>('');
 
   code = input.required<string>();
@@ -49,9 +51,10 @@ export class CodeViewer {
     const elementRef = inject(ElementRef);
 
     afterRenderEffect(async () => {
+      const colorMode = this.colorService.colorMode();
       const highlightedString = await this.highlighter.codeToHtml(this.code(), {
         lang: 'angular-ts',
-        theme: 'github-light',
+        theme: colorMode === 'dark' ? 'github-dark' : 'github-light',
       });
       elementRef.nativeElement.innerHTML = highlightedString;
     });
