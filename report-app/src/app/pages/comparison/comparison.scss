@@ -1,0 +1,36 @@
+.delete-compare-btn {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.delete-compare-btn:hover {
+  color: #b71c1c;
+}
+
+.add-compare-box-btn-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 16px;
+}
+
+h2 {
+  margin: 0 0 20px;
+}
+
+.report-selection {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex: 1;
+
+  report-select {
+    width: 100%;
+  }
+}

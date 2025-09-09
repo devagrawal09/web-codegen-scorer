@@ -1,0 +1,408 @@
+@let report = selectedReportWithSortedResults();
+@let overview = this.overview();
+@let details = report?.details;
+
+@if (overview) {
+  @let fw = overview.framework;
+  @let runner = overview.runner;
+
+  <section class="card summary-card root-section">
+    <div class="score-container">
+      <score
+        label="Score"
+        size="large"
+        [total]="overview.totalPoints"
+        [max]="overview.maxOverallPoints" />
+    </div>
+    <div>
+      <h2>{{ overview.displayName }}</h2>
+      <div class="summary-meta">
+        <span class="timestamp">
+          {{ overview.timestamp | date: 'medium' }}
+        </span>
+        @if (overview.labels.length > 0) {
+          <ul class="status-badge-group">
+            @for (label of overview.labels; track label) {
+              <li class="status-badge neutral">{{ label }}</li>
+            }
+          </ul>
+        }
+      </div>
+      <div class="summary-grid">
+        <div>
+          <h3>Model</h3>
+          <provider-label
+            [id]="overview.model"
+            [label]="overview.model"/>
+        </div>
+        @if (fw) {
+          <div>
+            <h3>Framework</h3>
+            <div class="framework-info">
+              <provider-label
+                [id]="fw.fullStackFramework.id"
+                [label]="fw.fullStackFramework.displayName"/>
+              @if (fw.clientSideFramework.id !== fw.fullStackFramework.id) {
+                <provider-label
+                  [id]="fw.clientSideFramework.id"
+                  [label]="fw.clientSideFramework.displayName"/>
+              }
+            </div>
+          </div>
+        }
+        @if (runner) {
+          <div>
+            <h3>Runner</h3>
+            <provider-label
+              [id]="runner.id"
+              [label]="runner.displayName"/>
+          </div>
+        }
+      </div>
+
+      <div class="summary-card-item large-chart-container">
+        <stacked-bar-chart [data]="checksAsGraphData(overview.stats.buckets)" />
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-container build-results-details">
+          <h3 class="chart-title">
+            <span class="material-symbols-outlined"> build </span>
+            <span>Build</span>
+          </h3>
+          <div class="summary-card-item">
+            <stacked-bar-chart
+              [data]="buildsAsGraphData(overview.stats.builds)"
+              [compact]="true"
+            />
+          </div>
+        </div>
+        @if (overview.stats.runtime) {
+          <div class="chart-container">
+            <h3 class="chart-title">
+              <span class="material-symbols-outlined"> schedule </span>
+              <span>Runtime</span>
+            </h3>
+            <div class="summary-card-item">
+              <stacked-bar-chart
+                [data]="runtimeStatsAsGraphData(overview.stats.runtime)!"
+                [compact]="true"
+              />
+            </div>
+          </div>
+        }
+        @if (overview.stats.security) {
+          <div class="chart-container">
+            <h3 class="chart-title">
+              <span class="material-symbols-outlined"> security </span>
+              <span>Security</span>
+            </h3>
+            <div class="summary-card-item">
+              <stacked-bar-chart
+                [data]="securityStatsAsGraphData(overview.stats.security)!"
+                [compact]="true"
+              />
+            </div>
+          </div>
+        }
+        @if (overview.stats.accessibility) {
+          <div class="chart-container">
+            <h3 class="chart-title">
+              <span class="material-symbols-outlined"> accessibility_new </span>
+              <span>Accessibility</span>
+            </h3>
+            <div class="summary-card-item">
+              <stacked-bar-chart
+                [data]="accessibilityStatsAsGraphData(overview.stats.accessibility)!"
+                [compact]="true"
+              />
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (details) {
+        <h3>Usage Details</h3>
+        <ul class="status-badge-group">
+          <li class="status-badge neutral">Input tokens: {{ details.summary.usage.inputTokens | number }}</li>
+          <li class="status-badge neutral">Output tokens: {{ details.summary.usage.outputTokens | number }}</li>
+
+          @if (details.summary.usage.totalTokens != null) {
+            <li class="status-badge neutral">Total tokens: {{ details.summary.usage.totalTokens | number }}</li>
+          }
+        </ul>
+      }
+    </div>
+  </section>
+
+  @if (isLoading()) {
+    <message-spinner message="Loading full report"/>
+  } @else if (report) {
+    @let details = report.details;
+
+    <expansion-panel size="large" class="root-section">
+      <expansion-panel-header>
+        <span class="material-symbols-outlined">assignment</span>
+        System Prompts
+      </expansion-panel-header>
+
+      @if (details.systemInstructionsPrompt || details.bestPracticesPrompt) {
+        <!-- Legacy code path for older reports. -->
+        <h4>System Prompt</h4>
+        <pre class="callout neutral code">{{ details.systemInstructionsPrompt }}</pre>
+        <h4>Best Practices Prompt</h4>
+        <pre class="callout neutral code">{{ details.bestPracticesPrompt }}</pre>
+      } @else {
+        <h4>Generation System Prompt</h4>
+        <pre class="callout neutral code">{{ details.systemPromptGeneration }}</pre>
+        <h4>Repair System Prompt</h4>
+        <pre class="callout neutral code">{{ details.systemPromptRepair }}</pre>
+      }
+    </expansion-panel>
+
+    @if (report.details.summary.aiSummary !== undefined) {
+      <expansion-panel size="large" class="root-section">
+        <expansion-panel-header>
+          <img src="gemini.webp" alt="Gemini Logo" height="30" width="30" />
+          AI Summary
+        </expansion-panel-header>
+        <div [innerHTML]="report.details.summary.aiSummary"></div>
+      </expansion-panel>
+    }
+
+    @if (missingDeps().length > 0) {
+      <expansion-panel size="large" class="root-section">
+        <expansion-panel-header>
+          <span class="material-symbols-outlined">select</span>
+          Missing Dependencies ({{ missingDeps().length }})
+        </expansion-panel-header>
+        <ul>
+          @for (dep of missingDeps(); track $index) {
+            <li>{{ dep[0] }} (used by: {{ renderSetToString(dep[1]) }})</li>
+          }
+        </ul>
+      </expansion-panel>
+    }
+
+    @if (details.mcp) {
+      <expansion-panel size="large" class="root-section">
+        <expansion-panel-header>
+          <span class="material-symbols-outlined">cloud</span>
+          MCP
+        </expansion-panel-header>
+
+        <h4>Servers</h4>
+        <ul>
+          @for (server of details.mcp.servers; track server) {
+            <li>
+              <span>
+                <strong>{{ server.name }}</strong
+                >:
+                <code
+                  >{{ server.command }}
+                  @for (arg of server.args; track arg) {
+                    {{ arg }}
+                  }
+                </code>
+              </span>
+            </li>
+          }
+        </ul>
+
+        <h4>Logs</h4>
+        <pre class="callout neutral code">{{ details.mcp.logs }}</pre>
+      </expansion-panel>
+    }
+
+    <h2>Generated applications</h2>
+    @if (allFailedChecks().length > 0) {
+      <details class="filter-dropdown" #dropdown>
+        <summary>Filter by failed checks ({{ selectedChecks().size }} selected)</summary>
+        <div class="dropdown-content">
+          <failed-checks-filter
+            [allFailedChecks]="allFailedChecks()"
+            [selectedChecks]="selectedChecks()"
+            (toggleCheck)="toggleCheckFilter($event)"
+          />
+        </div>
+      </details>
+    }
+    <div class="apps-list">
+      @for (result of filteredResults(); track result) {
+        <expansion-panel #appPanel size="small">
+          <expansion-panel-header>
+            <score
+              size="small"
+              [total]="result.score.totalPoints"
+              [max]="result.score.maxOverallPoints" />
+            <div class="app-header">
+              {{ result.promptDef.name }}
+
+              <div class="status-badge-group">
+                @let initialBuild = result.attemptDetails[0].buildResult;
+                @let repairBuild =
+                  result.attemptDetails.length > 1 ? result.attemptDetails[1].buildResult : null;
+                @let finalBuild = repairBuild ?? initialBuild;
+
+                @if (finalBuild.runtimeErrors) {
+                  <span class="status-badge error">Runtime error</span>
+                }
+
+                @if (repairBuild?.status === 'error') {
+                  <span class="status-badge error">Build after repair</span>
+                }
+
+                @if (initialBuild.status === 'error') {
+                  <span class="status-badge error">Initial build failed</span>
+                }
+              </div>
+            </div>
+
+          </expansion-panel-header>
+
+          @if (appPanel.opened()) {
+            <div class="app-details">
+              <div class="app-details-section">
+                <h4>Prompt</h4>
+                <pre class="callout neutral">{{ result.promptDef.prompt }}</pre>
+              </div>
+
+              <div class="app-details-section">
+                <h4>Results</h4>
+                @for (category of result.score.categories; track category.id) {
+                  <h5>
+                    {{ category.name }} ({{ category.points }}/{{ category.maxPoints }}
+                    points)
+                  </h5>
+
+                  <div class="category-wrapper">
+                    @for (check of category.assessments; track check.id) {
+                      <div class="check-details">
+                        @if (isSkippedAssessment(check)) {
+                          <span class="status">➖</span>
+                          <span class="name">{{ check.name }}</span>
+                          <span class="status-text points">Skipped: {{ check.message }}</span>
+                        } @else {
+                          @let isMax = check.successPercentage === 1;
+                          <span class="status status-text" [class.success]="isMax" [class.error]="!isMax">{{
+                            isMax ? '✔' : '✘'
+                          }}</span>
+                          <span class="name">{{ check.name }}</span>
+                          <span class="status-text points" [class.success]="isMax" [class.error]="!isMax">{{
+                            check.message
+                          }}</span>
+                        }
+                      </div>
+                    } @empty {
+                      <div class="check-details">No checks</div>
+                    }
+                  </div>
+                }
+                <!-- Total score section -->
+                <div class="check-details total">
+                  @let totalPercent = formatScore(result.score.totalPoints, result.score.maxOverallPoints);
+                  <span class="status"></span>
+                  <span class="name">Total: &nbsp;</span>
+                  <span
+                    class="status-text points"
+                    [class.success]="totalPercent >= 90"
+                    [class.warn]="totalPercent < 90 && totalPercent >= 80"
+                    [class.error]="totalPercent < 80">
+                    {{ result.score.totalPoints }} / {{ result.score.maxOverallPoints }} points ({{
+                      totalPercent
+                    }})
+                  </span>
+                </div>
+              </div>
+
+              <div class="app-details-section">
+                <h4>Additional info</h4>
+                @for (attempt of result.attemptDetails; track attempt) {
+                  @let isBuilt = attempt.buildResult.status === 'success';
+
+                  <expansion-panel #expansionPanel>
+                    <expansion-panel-header>
+                      {{ $index === 0 ? 'Initial response' : `Repair attempt #${$index}` }}
+                      <span
+                        class="status-badge"
+                        [class.success]="isBuilt"
+                        [class.error]="!isBuilt">Build</span>
+                    </expansion-panel-header>
+
+                    @if (expansionPanel.opened()) {
+                      @if (attempt.reasoning) {
+                        <details class="thoughts-button">
+                          <summary class="neutral-button">See LLM Thoughts</summary>
+                          <pre class="callout neutral code">{{ attempt.reasoning }}</pre>
+                        </details>
+                      }
+                      <h4>Build Message</h4>
+                      <pre class="callout warn code">{{ attempt.buildResult.message }}</pre>
+                      <h4>Generated Code</h4>
+
+                      @for (file of attempt.outputFiles; track file) {
+                        <strong>{{ file.filePath }}</strong>
+                        <div class="util-buttons button-group">
+                          <button class="text-button" (click)="copy(file.code)">
+                            Copy source code
+                          </button>
+                          <button class="text-button" (click)="format(file)">
+                            Format source code
+                          </button>
+                        </div>
+                        <app-code-viewer [code]="formatted().get(file) ?? file.code" />
+                      }
+                    }
+                  </expansion-panel>
+                }
+
+                @if (result.userJourneys && result.userJourneys.result.length > 0) {
+                  <expansion-panel>
+                    <expansion-panel-header>User Journeys</expansion-panel-header>
+                    @for (journey of result.userJourneys.result; track journey.name) {
+                      <h4>{{journey.name}}</h4>
+
+                      <ol>
+                        @for (step of journey.steps; track $index) {
+                          <li>{{ step }}</li>
+                        }
+                      </ol>
+                    }
+                  </expansion-panel>
+                }
+              </div>
+
+              <div class="app-details-section">
+                <h4>Debugging Tools</h4>
+                <button
+                  class="neutral-button"
+                  title="Download a ZIP for debugging. You can upload the ZIP to AI Studio for further analysis of a specific app."
+                  (click)="downloadDebuggingZip(result)">
+                  Download ZIP for debugging
+                </button>
+              </div>
+
+              @if (finalBuild.runtimeErrors) {
+                <div class="app-details-section">
+                  <h4>Runtime errors</h4>
+                  <pre class="callout warn code">{{ finalBuild.runtimeErrors }}</pre>
+                </div>
+              }
+
+              @let screenshot = getScreenshotUrl(result);
+
+              @if (screenshot) {
+                <div class="app-details-section">
+                  <h4>Screenshot</h4>
+                  <img class="screenshot" [src]="screenshot"/>
+                </div>
+              }
+            </div>
+          }
+        </expansion-panel>
+      }
+    </div>
+  }
+} @else if (!isLoading()) {
+  No report has been selected.
+}

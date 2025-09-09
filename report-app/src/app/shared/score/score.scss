@@ -1,0 +1,57 @@
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-status);
+}
+
+:host(.excellent-score) {
+  background-color: var(--status-fill-excellent);
+}
+
+:host(.great-score) {
+  background-color: var(--status-fill-great);
+}
+
+:host(.good-score) {
+  background-color: var(--status-fill-good);
+}
+
+:host(.poor-score) {
+  background-color: var(--status-fill-poor);
+}
+
+:host(.large) {
+  width: 128px;
+  height: 128px;
+  font-size: 3rem;
+  font-weight: bold;
+  border-radius: 8px;
+
+  .label {
+    font-size: 1rem;
+  }
+}
+
+:host(.medium) {
+  width: 56px;
+  height: 56px;
+  font-size: 1.6rem;
+  border-radius: 6px;
+
+  .label {
+    font-size: 0.7rem;
+  }
+}
+
+:host(.small) {
+  width: 36px;
+  height: 36px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+
+  .label {
+    font-size: 0.4rem;
+  }
+}

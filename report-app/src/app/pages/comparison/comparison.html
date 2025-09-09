@@ -1,0 +1,34 @@
+<div class="card">
+  <h2>Select Reports to Compare</h2>
+
+  @for (group of groupsToCompare(); track $index) {
+    <div class="report-selection">
+      <div class="report-header">
+        <input
+          type="text"
+          [value]="group.reportName"
+          (input)="updateReportName(group, $event.target.value)"
+        />
+      </div>
+      <report-select
+        [selection]="group.groupId"
+        (selectionChange)="setSelectedGroup($index, $event!)"
+        [reports]="groups()"
+      />
+      @if ($index > 1) {
+        <button class="negative-button" (click)="removeCompareBox($index)">Remove</button>
+      }
+    </div>
+  }
+  <div class="add-compare-box-btn-container">
+    <button (click)="addCompareBox()" class="accent-button">Add Comparison</button>
+  </div>
+</div>
+
+@let comparisonData = this.comparisonModelData();
+
+@if (comparisonData) {
+  <comparison-score-distribution class="card" [data]="comparisonData" />
+  <comparison-build-distribution  class="card" [data]="comparisonData" />
+  <comparison-runtime-distribution  class="card" [data]="comparisonData" />
+}

@@ -1,0 +1,46 @@
+<div class="report-container">
+  <header class="report-header">
+    <a routerLink="/" class="report-header-logo-wrapper">
+      <img src="wcs.svg" alt="Web Codegen Scorer Logo" />
+      <h1>Web Codegen Scorer</h1>
+    </a>
+
+    <div class="button-group">
+      <a
+        routerLink="/reports"
+        routerLinkActive="active"
+        class="icon-button reports-link"
+        title="Back to reports list">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+
+      <button class="icon-button" title="Toggle dark mode" (click)="toggleColorMode()">
+        <span class="material-symbols-outlined">{{colorMode()}}_mode</span>
+      </button>
+    </div>
+  </header>
+
+  <!--
+    This is a bit convoluted, but the goal is not to flash the
+    loading screen if there are reports and vice versa.
+  -->
+  @if (isLoading() || !groups().length) {
+    <div class="loading-overlay">
+      @if (!isServer && !isLoading() && !groups().length) {
+        <img
+          src="wcs.svg"
+          alt="Loading Web Codegen Scorer Logo"
+          class="loading-logo no-animation"
+        />
+        <div>No reports available</div>
+        <div>Run <code>web-codegen-scorer eval</code> to generate a report</div>
+      }
+    </div>
+  }
+
+  <main class="report-body">
+    <div class="report-content">
+      <router-outlet />
+    </div>
+  </main>
+</div>

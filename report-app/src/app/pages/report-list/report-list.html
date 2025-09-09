@@ -1,0 +1,104 @@
+<div class="report-list-container">
+  @if (isLoading()) {
+    <message-spinner message="Loading reports"/>
+  } @else {
+    <div class="toolbar">
+      <div class="filter-container">
+        @if (allFrameworks().length > 1) {
+          <select (change)="selectedFramework.set($any($event.target).value)">
+            <option value="">All Frameworks</option>
+            @for (framework of allFrameworks(); track framework.id) {
+              <option [value]="framework.id">{{ framework.displayName }}</option>
+            }
+          </select>
+        }
+        @if (allModels().length > 1) {
+          <select (change)="selectedModel.set($any($event.target).value)">
+            <option value="">All Models</option>
+            @for (model of allModels(); track model.id) {
+              <option [value]="model.id">{{ model.displayName }}</option>
+            }
+          </select>
+        }
+        @if (allRunners().length > 1) {
+          <select (change)="selectedRunner.set($any($event.target).value)">
+            <option value="">All Runners</option>
+            @for (runner of allRunners(); track runner.id) {
+              <option [value]="runner.id">{{ runner.displayName }}</option>
+            }
+          </select>
+        }
+      </div>
+      <div class="button-group">
+        @if (isCompareMode()) {
+          <button class="outlined-button" (click)="toggleCompareMode()">Cancel</button>
+        }
+        <button class="accent-button" (click)="handleCompare()" [class.active]="isCompareMode()">
+          Compare
+          @if (isCompareMode()) {
+            ({{ reportsToCompare().length }} selected)
+          }
+        </button>
+      </div>
+    </div>
+
+    @for (group of reportGroups(); track group.id) {
+      <div class="report-item">
+        <a [routerLink]="['/report', group.id]">
+          <div class="report-score-container">
+            <score [total]="group.totalPoints" [max]="group.maxOverallPoints" size="medium"/>
+          </div>
+          <div class="report-item-content">
+            <div class="run-name-container">
+              <div class="run-name">{{ group.displayName }}</div>
+              <div class="run-date">
+                {{ group.timestamp | date: 'medium' }}
+
+                @if (group.labels.length) {
+                  <ul class="status-badge-group">
+                    @for (label of group.labels; track label) {
+                      <li class="status-badge neutral">{{ label }}</li>
+                    }
+                  </ul>
+                }
+              </div>
+            </div>
+            <div class="run-meta-container">
+              <div class="run-meta">
+                <provider-label
+                  [id]="group.model"
+                  [label]="group.model"/>
+                <provider-label
+                  [id]="group.framework.fullStackFramework.id"
+                  [label]="group.framework.fullStackFramework.displayName"/>
+                @if (group.runner) {
+                  <provider-label
+                    [id]="group.runner.id"
+                    [label]="group.runner.displayName"/>
+                }
+              </div>
+              <stacked-bar-chart
+                [data]="getGraphData(group)"
+                [compact]="true"
+                [showLegend]="false"
+              />
+            </div>
+          </div>
+        </a>
+        @if (isCompareMode()) {
+          <div class="select-for-comparison">
+            <input
+              type="checkbox"
+              [checked]="isReportSelectedForComparison(group.id)"
+              (change)="onCheckboxChange($event, group.id)"
+            />
+          </div>
+        }
+      </div>
+    } @empty {
+      @if (!isServer) {
+        No results match the current filters
+      }
+    }
+  }
+</div>

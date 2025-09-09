@@ -1,0 +1,81 @@
+@use './app/shared/styles/buttons';
+@use './app/shared/styles/inputs';
+@use './app/shared/styles/callouts';
+@use './app/shared/styles/cards';
+@use './app/shared/styles/statuses';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-family:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --background-color: light-dark(#f1f4f9, #111827);
+  --card-bg-color: light-dark(#ffffff, #1f2937);
+  --text-primary: light-dark(#1e293b, #f9fafb);
+  --text-secondary: light-dark(#64748b, #9ca3af);
+  --border-color: light-dark(#e2e8f0, #374151);
+
+  --accent-blue: light-dark(#2563eb, #3b82f6);
+  --accent-green: light-dark(#16a34a, #22c55e);
+  --accent-red: light-dark(#dc2626, #ef4444);
+  --accent-orange: light-dark(#ea580c, #f97316);
+  --accent-yellow: light-dark(#fecc00, #facc15);
+  --button-active-bg-color: light-dark(#eff6ff, #374151);
+
+  --text-on-status: #fff;
+
+  --status-fill-excellent: #10b981;
+  --status-fill-great: #84cc16;
+  --status-fill-good: #f59e0b;
+  --status-fill-poor: #ef4444;
+  --status-fill-neutral: #eff6ff;
+
+  --status-text-excellent: #0c855d;
+  --status-text-great: #0c855d; // TODO: do we want to differentiate from `excellent`?
+  --status-text-good: #c57f08;
+  --status-text-poor: #eb1515;
+  --status-text-neutral: #64748b;
+
+  --border-radius: 0.75rem;
+  --shadow: light-dark(
+    0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05),
+    0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.2)
+  );
+  --transition-speed: 0.2s;
+  --main-container-width: 1200px;
+  --control-height: 36px;
+  --control-border-radius: 0.625rem;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+}
+
+html.dark-mode {
+  color-scheme: dark;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+@include buttons.button-styles;
+@include inputs.input-styles;
+@include callouts.callout-styles;
+@include cards.card-styles;
+@include statuses.status-styles;
+
+::view-transition-old(count),
+::view-transition-new(count) {
+  animation-duration: 200ms;
+  animation-name: -ua-view-transition-fade-in;
+}
+
+::view-transition-old(count) {
+  animation-name: -ua-view-transition-fade-out;
+}

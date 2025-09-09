@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.summary-legend {
+  display: flex;
+  width: 100%;
+  font-size: 12px;
+}
+
+.summary-legend .title {
+  font-weight: bold;
+}

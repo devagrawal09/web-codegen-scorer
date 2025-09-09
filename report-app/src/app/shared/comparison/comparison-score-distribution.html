@@ -1,0 +1,15 @@
+<comparison-stacked-bar-chart [data]="barChartData()" />
+
+<div class="summary-legend">
+  <div class="legend-section">
+    <p class="title">Good or Better:</p>
+    <ul>
+      @for (s of percentagesForTextOverview(); track s.name) {
+        <li>
+          {{ s.name }}:
+          <strong>{{ s.goodOrBetter }}%</strong>
+        </li>
+      }
+    </ul>
+  </div>
+</div>

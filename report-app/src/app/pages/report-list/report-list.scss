@@ -1,0 +1,165 @@
+h1, h2 {
+  margin: 0;
+}
+
+.report-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.report-list-container h1 {
+  font-size: 27px;
+  font-weight: 600;
+}
+
+.report-list-container h2 {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.report-item {
+  display: flex;
+  position: relative;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--card-bg-color);
+  transition: border-color var(--transition-speed) ease;
+
+  a {
+    color: inherit;
+    display: flex;
+    text-decoration: none;
+    width: 100%;
+  }
+
+  &:hover {
+    border-color: var(--accent-blue);
+  }
+
+  .report-score-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+}
+
+.report-item-content {
+  padding: 1rem 1rem 1rem 0;
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.run-name {
+  grid-column: 1;
+  grid-row: 1;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin: 0 0 0.25rem;
+}
+
+.run-date {
+  grid-column: 1;
+  grid-row: 2;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  align-self: end;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.run-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+  justify-items: end;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.run-name-container {
+  flex-grow: 1;
+}
+
+.run-meta-container {
+  width: 35%;
+}
+
+.report-item-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.report-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  font: inherit;
+  color: currentColor;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0.15rem solid var(--border-color);
+  border-radius: 0.35rem;
+  transform: translateY(-0.075em);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+
+.report-checkbox::before {
+  content: '';
+  width: 0.75rem;
+  height: 0.75rem;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em var(--card-bg-color);
+  // Use a CSS trick to create a checkmark
+  transform-origin: bottom left;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.report-checkbox:checked::before {
+  transform: scale(1);
+}
+
+.report-checkbox:checked {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.report-checkbox:hover {
+  border-color: var(--accent-blue);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.select-for-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.select-for-comparison input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}

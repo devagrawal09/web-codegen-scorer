@@ -1,0 +1,15 @@
+dist
+.tmp/
+.report-migration-backups
+.DS_Store
+.vscode
+safety-web.log
+node_modules
+
+report-app/node_modules
+report-app/dist
+report-app/.angular
+report-app/.vscode
+report-app/.reports
+
+.web-codegen-scorer

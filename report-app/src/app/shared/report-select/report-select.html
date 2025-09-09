@@ -1,0 +1,19 @@
+<div class="dropdown-wrapper">
+  <select (change)="onSelect($event)">
+    <option value="-1"></option>
+    @for (group of selectOptions(); track group) {
+      <optgroup [label]="group.dateGroup">
+        @for (runGroup of group.options; track runGroup.id) {
+          <option [value]="runGroup.id" [selected]="runGroup.id === selection()">
+            {{ runGroup.timestamp | date: 'shortTime' }} -
+            {{ runGroup.environmentId }} -
+            {{ runGroup.model }}
+            @if (runGroup.labels.length) {
+              - [{{ runGroup.labels.join(', ') }}]
+            }
+          </option>
+        }
+      </optgroup>
+    }
+  </select>
+</div>

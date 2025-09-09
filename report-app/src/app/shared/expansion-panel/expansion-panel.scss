@@ -1,0 +1,65 @@
+:host {
+  --expansion-panel-padding: 1rem;
+  display: block;
+  background: var(--card-bg-color);
+  border: solid 1px var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+:host:not(.is-open):hover {
+  border-color: var(--accent-blue);
+}
+
+summary {
+  list-style: none;
+  padding: var(--expansion-panel-padding);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  user-select: none;
+  border-bottom: solid 1px transparent;
+  color: var(--text-primary);
+
+  // Needs direct descendants to properly handle nested expansion panels.
+  :host(.is-open) > details > & {
+    border-bottom-color: var(--border-color);
+  }
+}
+
+.content {
+  padding: 0 var(--expansion-panel-padding) var(--expansion-panel-padding)
+    var(--expansion-panel-padding);
+
+  :host(.is-open) & {
+    animation: fade-in 0.4s ease;
+  }
+}
+
+:host(.size-large) {
+  --expansion-panel-padding: 1.5rem;
+
+  summary {
+    font-size: 1.25rem;
+  }
+}
+
+:host(.size-small) {
+  --expansion-panel-padding: 0.5rem;
+
+  summary {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

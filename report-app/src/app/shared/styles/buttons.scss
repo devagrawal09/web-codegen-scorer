@@ -1,0 +1,104 @@
+$_raised-padding: 0.5rem 1.25rem;
+$_raised-font-size: 0.95rem;
+$_raised-font-weight: 500;
+
+@mixin button-styles {
+  .button-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .accent-button {
+    @include _raised-button(var(--accent-blue));
+  }
+
+  .neutral-button {
+    @include _raised-button(var(--text-secondary));
+  }
+
+  .negative-button {
+    @include _raised-button(var(--accent-red));
+  }
+
+  .outlined-button {
+    @include _button-reset();
+    padding: $_raised-padding;
+    border-radius: var(--control-border-radius);
+    border: 1px solid var(--text-secondary);
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: $_raised-font-size;
+    font-weight: $_raised-font-weight;
+    height: var(--control-height);
+
+    &:hover {
+      background-color: var(--text-secondary);
+      color: var(--card-bg-color);
+    }
+  }
+
+  .icon-button {
+    @include _button-reset;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: none;
+    color: var(--text-color);
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+    transition:
+      color var(--transition-speed) ease,
+      background-color var(--transition-speed) ease,
+      border-color var(--transition-speed) ease;
+
+    &:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: transparent;
+    }
+  }
+
+  .text-button {
+    @include _button-reset;
+    color: var(--accent-blue);
+    font-weight: 600;
+    border: none;
+    padding: 0;
+    background: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@mixin _button-reset {
+  font-family: var(--font-family);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  cursor: pointer;
+  user-select: none;
+  list-style: none; // In case it's set on a `summary` element.
+}
+
+@mixin _raised-button($color) {
+  @include _button-reset();
+  padding: $_raised-padding;
+  border-radius: var(--control-border-radius);
+  border: 1px solid $color;
+  background-color: $color;
+  color: var(--card-bg-color); // TODO: use a different variable for this
+  font-size: $_raised-font-size;
+  font-weight: $_raised-font-weight;
+  height: var(--control-height);
+
+  &:hover {
+    background-color: transparent;
+    color: $color;
+  }
+}

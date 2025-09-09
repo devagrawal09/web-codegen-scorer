@@ -1,0 +1,53 @@
+@mixin status-styles {
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    border: 1px solid transparent;
+    list-style: none;
+
+    &.success {
+      background-color: var(--status-text-excellent);
+      color: var(--text-on-status);
+    }
+
+    &.error {
+      background-color: var(--status-text-poor);
+      color: var(--text-on-status);
+    }
+
+    &.warn {
+      background-color: var(--status-text-good);
+      color: var(--text-on-status);
+    }
+
+    &.neutral {
+      background-color: var(--button-active-bg-color);
+      color: var(--text-secondary);
+    }
+  }
+
+  .status-badge-group {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+  }
+
+  .status-text {
+    &.success {
+      color: var(--status-text-excellent);
+    }
+
+    &.error {
+      color: var(--status-text-poor);
+    }
+
+    &.warn {
+      color: var(--status-text-good);
+    }
+  }
+}
