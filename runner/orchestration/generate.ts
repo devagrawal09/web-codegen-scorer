@@ -664,7 +664,8 @@ async function installChrome(): Promise<void> {
   if (!chromeInstallPromise) {
     chromeInstallPromise = executeCommand(
       'npx puppeteer browsers install chrome',
-      process.cwd()
+      // The command needs to run in a directory whose closest node_modules contain `puppeteer`.
+      import.meta.dirname
     );
   }
 
