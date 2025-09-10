@@ -10,3 +10,7 @@ export { sufficientGeneratedFilesRating } from './sufficient-generated-files-rat
 export { userJourneysRating } from './user-journeys-rating.js';
 export { validCssRating } from './valid-css-rating.js';
 export { visualAppearanceRating } from './visual-appearance-rating.js';
+export {
+  cspViolationsRating,
+  trustedTypesViolationsRating,
+} from './security-ratings.js';

@@ -5,6 +5,7 @@ import {
   BrowserAgentTaskInput,
 } from '../testing/browser-agent/models.js';
 import { Result } from 'axe-core';
+import { CspViolation } from './auto-csp-types.js';
 
 /**
  * Represents the message structure used for communication between
@@ -32,6 +33,9 @@ export interface BuildWorkerMessage {
    */
   includeAxeTesting?: boolean;
 
+  /** Whether to enable the auto CSP checks. */
+  enableAutoCsp?: boolean;
+
   /** User journey browser agent task input */
   userJourneyAgentTaskInput?: BrowserAgentTaskInput;
 }
@@ -58,6 +62,7 @@ export interface BuildResult {
   /** JSON report from the Safety Web runner, if available. */
   safetyWebReportJson?: PackageSummary[];
   userJourneyAgentOutput: AgentOutput | null;
+  cspViolations?: CspViolation[];
   axeViolations?: Result[];
 }
 

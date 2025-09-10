@@ -73,14 +73,15 @@ export function calculateBuildAndCheckStats(
         accessibilityStats.appsWithoutErrors++;
       }
     }
-    if (result.build.safetyWebReportJson != undefined) {
-      securityStats ??= { appsWithErrors: 0, appsWithoutErrors: 0 };
+    securityStats ??= { appsWithErrors: 0, appsWithoutErrors: 0 };
+    const numCspViolations = (result.build.cspViolations || []).length;
+    const hasSafetyViolations =
+      (result.build.safetyWebReportJson?.[0]?.violations?.length ?? 0) > 0;
 
-      if (result.build.safetyWebReportJson[0].violations?.length > 0) {
-        securityStats.appsWithErrors++;
-      } else {
-        securityStats.appsWithoutErrors++;
-      }
+    if (hasSafetyViolations || numCspViolations > 0) {
+      securityStats.appsWithErrors++;
+    } else {
+      securityStats.appsWithoutErrors++;
     }
 
     const scorePercentage = Math.floor(

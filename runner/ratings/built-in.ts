@@ -12,6 +12,8 @@ import {
   userJourneysRating,
   NoInnerHtmlBindingsRating,
   NoDangerouslySetInnerHtmlRating,
+  cspViolationsRating,
+  trustedTypesViolationsRating,
 } from './built-in-ratings/index.js';
 
 /** Set of basic ratings applicable to any framework. */
@@ -29,5 +31,7 @@ export function getBuiltInRatings(): Rating[] {
     userJourneysRating,
     NoInnerHtmlBindingsRating,
     NoDangerouslySetInnerHtmlRating,
+    cspViolationsRating,
+    trustedTypesViolationsRating,
   ];
 }

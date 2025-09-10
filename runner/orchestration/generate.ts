@@ -75,6 +75,7 @@ export async function generateCodeAndAssess(options: {
   skipAiSummary?: boolean;
   skipAxeTesting: boolean;
   enableUserJourneyTesting?: boolean;
+  enableAutoCsp?: boolean;
   logging?: 'text-only' | 'dynamic';
 }): Promise<RunInfo> {
   const env = await getEnvironmentByPath(options.environmentConfigPath);
@@ -160,6 +161,7 @@ export async function generateCodeAndAssess(options: {
                   abortSignal,
                   options.skipAxeTesting,
                   !!options.enableUserJourneyTesting,
+                  !!options.enableAutoCsp,
                   workerConcurrencyQueue,
                   progress
                 ),
@@ -287,6 +289,7 @@ async function startEvaluationTask(
   abortSignal: AbortSignal,
   skipAxeTesting: boolean,
   enableUserJourneyTesting: boolean,
+  enableAutoCsp: boolean,
   workerConcurrencyQueue: PQueue,
   progress: ProgressLogger
 ): Promise<AssessmentResult[]> {
@@ -419,6 +422,7 @@ async function startEvaluationTask(
       attemptDetails,
       skipScreenshots,
       skipAxeTesting,
+      enableAutoCsp,
       abortSignal,
       workerConcurrencyQueue,
       progress,

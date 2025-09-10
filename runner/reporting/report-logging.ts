@@ -122,6 +122,18 @@ export async function writeReportToDisk(
           JSON.stringify(attempt.buildResult.safetyWebReportJson, null, 2)
         );
       }
+
+      // Write the CSP violations if they exist.
+      if (
+        attempt.buildResult.cspViolations &&
+        attempt.buildResult.cspViolations.length > 0
+      ) {
+        const reportFilePath = join(attemptPath, 'csp-violations.json');
+        await safeWriteFile(
+          reportFilePath,
+          JSON.stringify(attempt.buildResult.cspViolations, null, 2)
+        );
+      }
     }
   }
 

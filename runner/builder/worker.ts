@@ -6,6 +6,7 @@ import {
   BuildErrorType,
   BuildWorkerResponseMessage,
 } from './builder-types.js';
+import { CspViolation } from './auto-csp-types.js';
 import { runAppInPuppeteer } from './puppeteer.js';
 import { redX } from '../reporting/format.js';
 import { callWithTimeout } from '../utils/timeout.js';
@@ -28,6 +29,7 @@ process.on('message', async (message: BuildWorkerMessage) => {
     takeScreenshots,
     includeAxeTesting,
     userJourneyAgentTaskInput,
+    enableAutoCsp,
   } = message;
   let result: BuildResult;
   const runtimeErrors: string[] = [];
@@ -108,6 +110,7 @@ process.on('message', async (message: BuildWorkerMessage) => {
   let screenshotBase64Data: string | undefined = undefined;
   let axeViolations: any[] | undefined = [];
   let userJourneyAgentOutput: AgentOutput | null = null;
+  let cspViolations: CspViolation[] | undefined = [];
 
   try {
     if (needsToServeApp) {
@@ -126,13 +129,15 @@ process.on('message', async (message: BuildWorkerMessage) => {
                 directory,
                 !!takeScreenshots,
                 !!includeAxeTesting,
-                progressLog
+                progressLog,
+                !!enableAutoCsp
               ),
             4 // 4min
           );
 
           screenshotBase64Data = result.screenshotBase64Data;
           axeViolations = result.axeViolations;
+          cspViolations = result.cspViolations;
           if (collectRuntimeErrors) {
             runtimeErrors.push(...result.runtimeErrors);
           }
@@ -156,6 +161,7 @@ process.on('message', async (message: BuildWorkerMessage) => {
       axeViolations,
       safetyWebReportJson,
       userJourneyAgentOutput: userJourneyAgentOutput,
+      cspViolations,
     };
   } catch (error: any) {
     const cleanErrorMessage = cleanupBuildMessage(error.message);
@@ -169,6 +175,7 @@ process.on('message', async (message: BuildWorkerMessage) => {
       runtimeErrors: runtimeErrors.join('\n'),
       safetyWebReportJson,
       userJourneyAgentOutput: userJourneyAgentOutput,
+      cspViolations,
     };
   }
 

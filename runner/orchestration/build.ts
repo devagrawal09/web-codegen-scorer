@@ -52,6 +52,7 @@ export async function attemptBuild(
   attemptDetails: AttemptDetails[],
   skipScreenshots: boolean,
   skipAxeTesting: boolean,
+  enableAutoCsp: boolean,
   abortSignal: AbortSignal,
   workerConcurrencyQueue: PQueue,
   progress: ProgressLogger,
@@ -65,6 +66,7 @@ export async function attemptBuild(
     takeScreenshots: !skipScreenshots,
     collectRuntimeErrors: true,
     includeAxeTesting: !skipAxeTesting,
+    enableAutoCsp: enableAutoCsp,
     userJourneyAgentTaskInput,
   };
 

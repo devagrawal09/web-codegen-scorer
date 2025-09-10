@@ -47,6 +47,7 @@ interface Options {
   skipAiSummary?: boolean;
   skipAxeTesting?: boolean;
   enableUserJourneyTesting?: boolean;
+  enableAutoCsp?: boolean;
   logging?: 'text-only' | 'dynamic';
 }
 
@@ -144,6 +145,12 @@ function builder(argv: Argv): Argv<Options> {
       description:
         'Whether to enable user journey testing through browser automation',
     })
+    .option('enable-auto-csp', {
+      type: 'boolean',
+      default: false,
+      description:
+        'Whether to include a automatic hash-based Content-Security-Policy and Trusted Types to find incompatibilities.',
+    })
     .strict()
     .version(false)
     .help()
@@ -190,6 +197,7 @@ async function handler(cliArgs: Arguments<Options>): Promise<void> {
       labels: cliArgs.labels || [],
       skipAxeTesting: !!cliArgs.skipAxeTesting,
       enableUserJourneyTesting: cliArgs.enableUserJourneyTesting,
+      enableAutoCsp: cliArgs.enableAutoCsp,
       logging: cliArgs.logging,
     });
 

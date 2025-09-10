@@ -5,6 +5,8 @@ import path from 'path';
 import puppeteer from 'puppeteer';
 import { callWithTimeout } from '../utils/timeout.js';
 import { BuilderProgressLogFn } from './builder-types.js';
+import { AutoCsp } from './auto-csp.js';
+import { CspViolation } from './auto-csp-types.js';
 
 /**
  * Uses Puppeteer to take a screenshot of the main page, perform Axe testing,
@@ -17,9 +19,11 @@ export async function runAppInPuppeteer(
   tempDir: string,
   takeScreenshots: boolean,
   includeAxeTesting: boolean,
-  progressLog: BuilderProgressLogFn
+  progressLog: BuilderProgressLogFn,
+  enableAutoCsp: boolean
 ) {
   const runtimeErrors: string[] = [];
+  let cspViolations: CspViolation[] = [];
   let screenshotBase64Data: string | undefined;
   let axeViolations: Result[] | undefined;
 
@@ -71,10 +75,40 @@ export async function runAppInPuppeteer(
     });
 
     await page.setViewport({ width: 1280, height: 720 });
-    await page.goto(hostUrl, {
-      waitUntil: 'networkidle0',
-      timeout: 30000,
-    });
+
+    // Set up auto-CSP handling if enabled for the environment.
+    if (enableAutoCsp) {
+      const autoCsp = new AutoCsp(hostUrl, tempDir);
+      await autoCsp.connectToDevTools(page);
+      await page.setRequestInterception(true);
+      page.on('request', async (request) => {
+        if (request.isInterceptResolutionHandled()) {
+          return;
+        }
+
+        // Delegate CSP-related requests to the AutoCsp class
+        const handled = await autoCsp.handleRequest(request);
+        if (!handled) {
+          // Other requests (CSS, JS, images) pass through
+          await request.continue();
+        }
+      });
+
+      await page.goto(hostUrl, {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
+
+      // Now that the page is loaded, process the collected CSP reports.
+      autoCsp.processViolations();
+      cspViolations = autoCsp.violations;
+    } else {
+      // If CSP is not enabled, just navigate to the page directly.
+      await page.goto(hostUrl, {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
+    }
 
     // Perform Axe Testing
     if (includeAxeTesting) {
@@ -128,5 +162,5 @@ export async function runAppInPuppeteer(
     progressLog('error', 'Could not take screenshot', details);
   }
 
-  return { screenshotBase64Data, runtimeErrors, axeViolations };
+  return { screenshotBase64Data, runtimeErrors, axeViolations, cspViolations };
 }
