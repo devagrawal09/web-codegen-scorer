@@ -23,7 +23,9 @@ export async function runAppInPuppeteer(
   enableAutoCsp: boolean
 ) {
   const runtimeErrors: string[] = [];
-  let cspViolations: CspViolation[] = [];
+
+  // Undefined by default so it gets flagged correctly as `skipped` if there's no data.
+  let cspViolations: CspViolation[] | undefined;
   let screenshotBase64Data: string | undefined;
   let axeViolations: Result[] | undefined;
 
