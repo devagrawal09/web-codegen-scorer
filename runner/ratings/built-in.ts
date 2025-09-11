@@ -32,6 +32,7 @@ export function getBuiltInRatings(): Rating[] {
     NoInnerHtmlBindingsRating,
     NoDangerouslySetInnerHtmlRating,
     cspViolationsRating,
-    trustedTypesViolationsRating,
+    // TODO: Re-enable after https://github.com/google/strict-csp update.
+    // trustedTypesViolationsRating,
   ];
 }
