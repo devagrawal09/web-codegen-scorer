@@ -8,10 +8,10 @@ import {
 
 // Define the scoring weights for each violation impact level as a coefficient penalty.
 const IMPACT_COEFFICIENTS = {
-  critical: 0.3,
-  serious: 0.15,
-  moderate: 0.1,
-  minor: 0.05,
+  critical: 0.5,
+  serious: 0.3,
+  moderate: 0.15,
+  minor: 0.1,
 };
 
 /**
@@ -23,13 +23,13 @@ export const axeRating: PerBuildRating = {
   description: 'Checks for accessibility violations using the Axe-core engine.',
   category: RatingCategory.MEDIUM_IMPACT,
   id: 'axe-a11y',
-  scoreReduction: '10%',
+  scoreReduction: '50%',
   rate: ({ buildResult, axeRepairAttempts }) => {
     const violations = buildResult.axeViolations as Result[] | undefined;
     // Subtract from a starting coefficient of 1 based on the impact of each violation.
     let coefficient = 1.0;
     // Apply a penalty for each repair attempt.
-    coefficient -= (axeRepairAttempts ?? 0) * 0.1;
+    coefficient -= (axeRepairAttempts ?? 0) * 0.2;
     let message: string = '';
 
     if (violations === undefined) {
