@@ -36,6 +36,17 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use `NgOptimizedImage` for all static images.
   - `NgOptimizedImage` does not work for inline base64 images.
 
+### Accessibility (a11y)
+
+- Use semantic HTML5 elements. Each page must have at least one heading and a single, top-level `<main>` landmark.
+- Ensure landmark elements (`<header>`, `<nav>`, `<footer>`, etc.) are unique.
+- Maintain a logical and semantically correct heading order.
+- All functionality must be keyboard-accessible with a visible focus indicator.
+- A scrollable region must not be focusable.
+- All UI components must have accessible names (e.g., using `<label>` for form controls or `alt` for images).
+- Use ARIA roles and attributes correctly.
+- Ensure the contrast between foreground/background and non-text colors meets WCAG 2 AA minimums.
+
 ### Components
 
 - Keep components small and focused on a single responsibility
