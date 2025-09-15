@@ -328,6 +328,7 @@ export class ReportViewer {
 
   protected accessibilityStatsAsGraphData(stats: {
     appsWithErrors: number;
+    appsWithoutErrorsAfterRepair?: number;
     appsWithoutErrors: number;
   }) {
     return [
@@ -336,6 +337,18 @@ export class ReportViewer {
         color: ScoreCssVariable.excellent,
         value: stats.appsWithoutErrors,
       },
+      // Conditionally add the 'Successful after repair' bar. This property is
+      // optional to maintain backwards compatibility with older reports where
+      // this metric was not calculated.
+      ...(typeof stats.appsWithoutErrorsAfterRepair === 'number'
+        ? [
+            {
+              label: 'Successful after repair',
+              color: ScoreCssVariable.great,
+              value: stats.appsWithoutErrorsAfterRepair,
+            },
+          ]
+        : []),
       {
         label: 'Have violations',
         color: ScoreCssVariable.poor,

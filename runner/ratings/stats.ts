@@ -29,7 +29,11 @@ export function calculateBuildAndCheckStats(
   let failedBuilds = 0;
   let runtimeStats: RuntimeStats | undefined;
   let accessibilityStats:
-    | { appsWithErrors: number; appsWithoutErrors: number }
+    | {
+        appsWithErrors: number;
+        appsWithoutErrorsAfterRepair: number;
+        appsWithoutErrors: number;
+      }
     | undefined;
   let securityStats:
     | { appsWithErrors: number; appsWithoutErrors: number }
@@ -66,11 +70,19 @@ export function calculateBuildAndCheckStats(
       }
     }
     if (result.build.axeViolations != undefined) {
-      accessibilityStats ??= { appsWithErrors: 0, appsWithoutErrors: 0 };
+      accessibilityStats ??= {
+        appsWithErrors: 0,
+        appsWithoutErrors: 0,
+        appsWithoutErrorsAfterRepair: 0,
+      };
       if (result.build.axeViolations.length > 0) {
         accessibilityStats.appsWithErrors++;
       } else {
-        accessibilityStats.appsWithoutErrors++;
+        if (result.axeRepairAttempts === 0) {
+          accessibilityStats.appsWithoutErrors++;
+        } else {
+          accessibilityStats.appsWithoutErrorsAfterRepair++;
+        }
       }
     }
     securityStats ??= { appsWithErrors: 0, appsWithoutErrors: 0 };

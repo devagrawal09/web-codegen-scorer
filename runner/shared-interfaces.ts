@@ -264,7 +264,11 @@ export interface AggregatedRunStats {
   /** Runtime stats. Not present for reports that didn't request runtime error collection. */
   runtime?: RuntimeStats;
 
-  accessibility?: { appsWithErrors: number; appsWithoutErrors: number };
+  accessibility?: {
+    appsWithErrors: number;
+    appsWithoutErrorsAfterRepair: number;
+    appsWithoutErrors: number;
+  };
   security?: { appsWithErrors: number; appsWithoutErrors: number };
 }
 
