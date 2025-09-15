@@ -20,8 +20,9 @@ export type StackedBarChartData = Array<{
               [style.width.%]="asPercent(item.value)"
               [style.background-color]="item.color"
               (click)="toggleDisplayMode(item)"
+              [attr.data-tooltip]="getTooltipText(item)"
             >
-              {{ getItemDisplayValue(item) }}
+              {{ getItemDisplayValue(item, displayPercentage()) }}
             </div>
           }
         }
@@ -58,8 +59,6 @@ export type StackedBarChartData = Array<{
     .stacked-bar {
       display: flex;
       height: 45px;
-      border-radius: 8px;
-      overflow: hidden;
       margin-bottom: 1rem;
     }
 
@@ -88,6 +87,16 @@ export type StackedBarChartData = Array<{
       min-width: 50px;
     }
 
+    .segment:first-child {
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+
+    .segment:last-child {
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
     .segment:hover {
       filter: brightness(1.1);
     }
@@ -111,6 +120,39 @@ export type StackedBarChartData = Array<{
       border-radius: 4px;
       margin-right: 8px;
     }
+
+    .segment::before {
+      content: attr(data-tooltip); /* Use a data attribute for the text */
+      position: absolute;
+      bottom: 110%; /* Position it above the segment */
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--tooltip-background-color);
+      color: var(--tooltip-text-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.2s ease-in-out,
+        visibility 0.2s ease-in-out;
+      z-index: 10;
+    }
+
+    .segment:last-child:not(:only-child)::before {
+      right: 0;
+      left: auto;
+      transform: none;
+    }
+
+    /* Show tooltip on hover */
+    .segment:hover::before,
+    .segment:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
   `,
 })
 export class StackedBarChart {
@@ -121,7 +163,7 @@ export class StackedBarChart {
   total = computed(() =>
     this.data().reduce((acc, item) => acc + item.value, 0)
   );
-  private displayPercentage = signal(false);
+  protected displayPercentage = signal(false);
 
   asPercent(value: number) {
     if (this.total() === 0) return 0;
@@ -133,10 +175,19 @@ export class StackedBarChart {
     this.displayPercentage.update((current) => !current);
   }
 
-  getItemDisplayValue(item: StackedBarChartData[0]): string {
+  getItemDisplayValue(
+    item: StackedBarChartData[0],
+    showPercent: boolean
+  ): string {
     if (item.value === 0) return '';
-    return this.displayPercentage()
-      ? `${this.asPercent(item.value)}%`
-      : `${item.value}`;
+    return showPercent ? `${this.asPercent(item.value)}%` : `${item.value}`;
+  }
+
+  getTooltipText(item: StackedBarChartData[0]) {
+    if (!this.showLegend()) {
+      return item.label;
+    }
+
+    return this.getItemDisplayValue(item, !this.displayPercentage());
   }
 }
