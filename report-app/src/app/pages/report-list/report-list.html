@@ -81,6 +81,7 @@
                 [data]="getGraphData(group)"
                 [compact]="true"
                 [showLegend]="false"
+                (click)="$event.preventDefault(); $event.stopPropagation()"
               />
             </div>
           </div>
