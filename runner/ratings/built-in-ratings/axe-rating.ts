@@ -26,7 +26,7 @@ export const axeRating: PerBuildRating = {
   description: 'Checks for accessibility violations using the Axe-core engine.',
   category: RatingCategory.MEDIUM_IMPACT,
   id: 'axe-a11y',
-  scoreReduction: '20%',
+  scoreReduction: '10%',
   rate: ({ buildResult, axeRepairAttempts }) => {
     const violations = buildResult.axeViolations as Result[] | undefined;
     // Start with a perfect score.
