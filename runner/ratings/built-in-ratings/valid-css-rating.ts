@@ -18,6 +18,7 @@ export const validCssRating: PerFileRating = {
   rate: async (code, _filePath) => {
     const linterResult = await stylelint.lint({
       code: code,
+      cwd: import.meta.dirname,
       config: {
         extends: ['stylelint-config-recommended-scss'],
         defaultSeverity: 'warning',
