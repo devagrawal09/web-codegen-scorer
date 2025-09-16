@@ -37,8 +37,9 @@ const args = yargs(hideBin(process.argv))
     await getPackageJson(join(root, 'package.json'))
   );
 
-  // Copy the readme.
+  // Copy the readme and license.
   await cp(join(root, 'README.md'), join(targetDirectory, 'README.md'));
+  await cp(join(root, 'LICENSE'), join(targetDirectory, 'LICENSE'));
 
   // Copy all the examples as is.
   await Promise.all(
