@@ -28,7 +28,7 @@ import { ReportsFetcher } from '../../services/reports-fetcher';
 import {
   StackedBarChart,
   StackedBarChartData,
-} from '../../shared/visualization/stacked-bar-chart';
+} from '../../shared/visualization/stacked-bar-chart/stacked-bar-chart';
 import { formatFile } from './formatter';
 import { FailedChecksFilter } from './failed-checks-filter';
 import { MessageSpinner } from '../../shared/message-spinner';

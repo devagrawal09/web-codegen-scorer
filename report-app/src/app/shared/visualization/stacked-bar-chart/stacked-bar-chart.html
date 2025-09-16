@@ -1,0 +1,33 @@
+<div class="chart-container">
+  <!-- The main stacked bar -->
+  <div class="stacked-bar" [class.compact]="compact()">
+    @for (item of data(); track $index) {
+      @if (item.value > 0) {
+        <div
+          class="segment"
+          [style.width.%]="asPercent(item.value)"
+          [style.background-color]="item.color"
+          (click)="toggleDisplayMode()"
+          [attr.data-tooltip]="showLegend() ? null : item.label"
+        >
+          {{ getItemDisplayValue(item) }}
+        </div>
+      }
+    }
+  </div>
+
+  <!-- The legend for the bar chart -->
+  @if (showLegend()) {
+    <div class="legend">
+      @for (item of data(); track $index) {
+        <div class="legend-item">
+          <span
+            class="legend-color"
+            [style.background-color]="item.color"
+          ></span>
+          {{ item.label }}
+        </div>
+      }
+    </div>
+  }
+</div>

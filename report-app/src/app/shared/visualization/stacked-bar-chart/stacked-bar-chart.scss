@@ -1,0 +1,100 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.chart-container {
+  width: 100%;
+  background-color: var(--card-bg-color);
+}
+
+.stacked-bar {
+  display: flex;
+  height: 45px;
+  margin-bottom: 1rem;
+
+  &.compact {
+    margin-bottom: 0;
+    height: 24px;
+
+    .segment {
+      font-size: 12px;
+    }
+
+    & + .legend {
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+.segment {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  transition: filter 0.2s ease-in-out;
+  min-width: 50px;
+
+  &:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+
+  &:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+
+  &[data-tooltip]::before {
+    content: attr(data-tooltip); // Use a data attribute for the text
+    position: absolute;
+    bottom: 110%; // Position it above the segment
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--tooltip-background-color);
+    color: var(--tooltip-text-color);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.2s ease-in-out,
+      visibility 0.2s ease-in-out;
+    z-index: 10;
+  }
+
+  &[data-tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  margin-right: 8px;
+}

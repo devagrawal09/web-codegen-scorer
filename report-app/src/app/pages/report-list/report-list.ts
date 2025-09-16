@@ -12,7 +12,7 @@ import { ScoreBucket, RunGroup } from '../../../../../runner/shared-interfaces';
 import {
   StackedBarChart,
   StackedBarChartData,
-} from '../../shared/visualization/stacked-bar-chart';
+} from '../../shared/visualization/stacked-bar-chart/stacked-bar-chart';
 import { MessageSpinner } from '../../shared/message-spinner';
 import { Score } from '../../shared/score/score';
 import { ProviderLabel } from '../../shared/provider-label';
