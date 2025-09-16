@@ -80,9 +80,11 @@ async function getAnswers(): Promise<InitOptions | null> {
   const configPath = await input({
     message: 'Where should we place the environment config file?',
     required: true,
-    default: join(generateId(displayName) || 'env', 'config.js'),
+    default: join(generateId(displayName) || 'env', 'config.mjs'),
     validate: (value) =>
-      value.endsWith('.js') ? true : 'Config must be a .js file',
+      value.endsWith('.js') || value.endsWith('.mjs')
+        ? true
+        : 'Config must be a .mjs or .js file',
   });
   const clientSideFramework = await input({
     message: 'What client-side framework will it be using?',

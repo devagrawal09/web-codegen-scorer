@@ -1,8 +1,8 @@
 # Environment configuration reference
 
-Environments are configured by creating a `config.js` that exposes an object that satisfies the
-`EnvironmentConfig` interface. This document covers all options in `EnvironmentConfig`
-and what they do.
+Environments are configured by creating a `config.mjs` or `config.js` file that exposes an object
+that satisfies the `EnvironmentConfig` interface. This document covers all options in
+`EnvironmentConfig` and what they do.
 
 ## Required properties
 

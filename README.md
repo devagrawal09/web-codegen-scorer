@@ -63,7 +63,7 @@ You can customize the `web-codegen-scorer eval` script with the following flags:
 
 - `--env=<path>` (alias: `--environment`): (**Required**) Specifies the path from which to load the
   environment config.
-    - Example: `web-codegen-scorer eval --env=foo/bar/my-env.js`
+    - Example: `web-codegen-scorer eval --env=foo/bar/my-env.mjs`
 
 - `--model=<name>`: Specifies the model to use when generating code. Defaults to the value of
   `DEFAULT_MODEL_NAME`.
