@@ -1,6 +1,6 @@
 {
   "name": "web-codegen-scorer",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "scripts": {
     "build-runner": "tsc",
     "release-build": "tsx release-build.ts",
@@ -39,7 +39,8 @@
     "default": "./runner/index.js"
   },
   "bin": {
-    "web-codegen-scorer": "./runner/bin/cli.js"
+    "web-codegen-scorer": "./runner/bin/cli.js",
+    "wcs": "./runner/bin/cli.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.56.0",
