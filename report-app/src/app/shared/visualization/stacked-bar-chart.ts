@@ -19,10 +19,10 @@ export type StackedBarChartData = Array<{
               class="segment"
               [style.width.%]="asPercent(item.value)"
               [style.background-color]="item.color"
-              (click)="toggleDisplayMode(item)"
-              [attr.data-tooltip]="getTooltipText(item)"
+              (click)="toggleDisplayMode()"
+              [attr.data-tooltip]="showLegend() ? null : item.label"
             >
-              {{ getItemDisplayValue(item, displayPercentage()) }}
+              {{ getItemDisplayValue(item) }}
             </div>
           }
         }
@@ -53,7 +53,6 @@ export type StackedBarChartData = Array<{
     .chart-container {
       width: 100%;
       background-color: var(--card-bg-color);
-      border-radius: 12px;
     }
 
     .stacked-bar {
@@ -112,6 +111,7 @@ export type StackedBarChartData = Array<{
       align-items: center;
       font-size: 14px;
       color: var(--text-secondary);
+      white-space: nowrap;
     }
 
     .legend-color {
@@ -121,7 +121,7 @@ export type StackedBarChartData = Array<{
       margin-right: 8px;
     }
 
-    .segment::before {
+    .segment[data-tooltip]::before {
       content: attr(data-tooltip); /* Use a data attribute for the text */
       position: absolute;
       bottom: 110%; /* Position it above the segment */
@@ -141,12 +141,6 @@ export type StackedBarChartData = Array<{
       z-index: 10;
     }
 
-    .segment:last-child:not(:only-child)::before {
-      right: 0;
-      left: auto;
-      transform: none;
-    }
-
     /* Show tooltip on hover */
     .segment:hover::before,
     .segment:hover::after {
@@ -163,6 +157,7 @@ export class StackedBarChart {
   total = computed(() =>
     this.data().reduce((acc, item) => acc + item.value, 0)
   );
+
   protected displayPercentage = signal(false);
 
   asPercent(value: number) {
@@ -171,23 +166,14 @@ export class StackedBarChart {
     return parseFloat(percentage.toFixed(percentage % 1 === 0 ? 0 : 1));
   }
 
-  toggleDisplayMode(item: StackedBarChartData[0]): void {
+  toggleDisplayMode(): void {
     this.displayPercentage.update((current) => !current);
   }
 
-  getItemDisplayValue(
-    item: StackedBarChartData[0],
-    showPercent: boolean
-  ): string {
+  getItemDisplayValue(item: StackedBarChartData[0]): string {
     if (item.value === 0) return '';
-    return showPercent ? `${this.asPercent(item.value)}%` : `${item.value}`;
-  }
-
-  getTooltipText(item: StackedBarChartData[0]) {
-    if (!this.showLegend()) {
-      return item.label;
-    }
-
-    return this.getItemDisplayValue(item, !this.displayPercentage());
+    return this.displayPercentage()
+      ? `${this.asPercent(item.value)}%`
+      : `${item.value}`;
   }
 }
