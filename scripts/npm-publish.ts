@@ -47,7 +47,10 @@ const registry = 'https://wombat-dressing-room.appspot.com';
 
     // Write the package.json back to disk so the version is in sync.
     packageJson.version = version;
-    await writeFile(packageJsonPath, JSON.stringify(packageJson, undefined, 2));
+    await writeFile(
+      packageJsonPath,
+      JSON.stringify(packageJson, undefined, 2) + '\n'
+    );
 
     console.log('Done! 🎉');
     console.log('Remember to push the changed package.json!');
