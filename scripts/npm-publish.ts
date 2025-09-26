@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { spawn } from 'child_process';
-import { input } from '@inquirer/prompts';
+import { input, select } from '@inquirer/prompts';
 import { executeCommand } from '../runner/utils/exec.js';
 import { readFile, writeFile } from 'fs/promises';
 
@@ -20,6 +20,14 @@ const registry = 'https://wombat-dressing-room.appspot.com';
       required: true,
     });
 
+    const distTag = await select({
+      choices: [
+        { name: 'Pre-release', value: 'next' },
+        { name: 'Stable', value: 'latest' },
+      ],
+      message: 'Select a release channel',
+    });
+
     // Build the project.
     await executeCommand(
       `pnpm release-build --version=${version}`,
@@ -36,7 +44,7 @@ const registry = 'https://wombat-dressing-room.appspot.com';
 
     // Publish to npm.
     await executeCommand(
-      `npm --registry ${registry} publish --access public --tag latest`,
+      `npm --registry ${registry} publish --access public --tag ${distTag}`,
       distDirectory,
       undefined,
       {
