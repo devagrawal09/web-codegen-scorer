@@ -43,7 +43,6 @@ import {
   setupProjectStructure,
   writeResponseFiles,
 } from './file-system.js';
-import { GenkitRunner } from '../codegen/genkit/genkit-runner.js';
 import { getEnvironmentByPath } from '../configuration/environment-resolution.js';
 import { getPossiblePackageManagers } from '../configuration/environment-config.js';
 import { ProgressLogger } from '../progress/progress-logger.js';
@@ -71,7 +70,7 @@ import { RunnerName } from '../codegen/runner-creation.js';
  *          each containing the prompt, generated code, and final validation status.
  */
 export async function generateCodeAndAssess(options: {
-  ratingLlm: GenkitRunner;
+  ratingLlm: LlmRunner;
   model: string;
   runner: RunnerName;
   environmentConfigPath: string;
@@ -317,7 +316,7 @@ async function startEvaluationTask(
   evalID: EvalID,
   env: Environment,
   gateway: Gateway<Environment>,
-  ratingLlm: GenkitRunner,
+  ratingLlm: LlmRunner,
   model: string,
   rootPromptDef: PromptDefinition | MultiStepPromptDefinition,
   localMode: boolean,
@@ -433,18 +432,36 @@ async function startEvaluationTask(
       break;
     }
 
-    const userJourneys = await generateUserJourneysForApp(
-      ratingLlm,
-      rootPromptDef.name,
-      defsToExecute[0].prompt,
-      initialResponse.files,
-      abortSignal
-    );
+    let userJourneys: Awaited<
+      ReturnType<typeof generateUserJourneysForApp>
+    > | null = null;
+    try {
+      userJourneys = await generateUserJourneysForApp(
+        ratingLlm,
+        rootPromptDef.name,
+        defsToExecute[0].prompt,
+        initialResponse.files,
+        abortSignal
+      );
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : error
+            ? String(error)
+            : 'Unknown reason';
+      progress.log(
+        promptDef,
+        'eval',
+        'Skipping user journey generation',
+        message
+      );
+    }
 
     // TODO: Only execute the serve command on the "final working attempt".
     // TODO: Incorporate usage.
     const userJourneyAgentTaskInput: BrowserAgentTaskInput | undefined =
-      enableUserJourneyTesting
+      enableUserJourneyTesting && userJourneys && userJourneys.result.length
         ? {
             userJourneys: userJourneys.result,
             appPrompt: defsToExecute[0].prompt,
@@ -506,7 +523,7 @@ async function startEvaluationTask(
       score,
       repairAttempts: attempt.repairAttempts,
       attemptDetails,
-      userJourneys: userJourneys,
+      userJourneys: userJourneys ?? undefined,
       axeRepairAttempts: attempt.axeRepairAttempts,
       toolLogs,
     } satisfies AssessmentResult);
@@ -612,7 +629,7 @@ async function generateInitialFiles(
  * and also some extra metadata about the run.
  */
 async function prepareSummary(
-  genkit: GenkitRunner,
+  llm: LlmRunner,
   abortSignal: AbortSignal,
   model: string,
   env: Environment,
@@ -646,7 +663,7 @@ async function prepareSummary(
   if (!opts.skipAiSummary) {
     try {
       const result = await summarizeReportWithAI(
-        genkit,
+        llm,
         abortSignal,
         assessments
       );

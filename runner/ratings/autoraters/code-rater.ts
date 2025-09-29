@@ -13,7 +13,7 @@ import {
   getCoefficient,
   MAX_RATING,
 } from './auto-rate-shared.js';
-import { GenkitRunner } from '../../codegen/genkit/genkit-runner.js';
+import { LlmRunner } from '../../codegen/llm-runner.js';
 import defaultCodeRaterPrompt from './code-rating-prompt.js';
 import { RatingsResult } from '../rating-types.js';
 
@@ -42,7 +42,7 @@ const CACHED_RATING_PROMPTS: Record<string, string> = {};
  * @param ratingsResult Context containing results from previous ratings.
  */
 export async function autoRateCode(
-  llm: GenkitRunner,
+  llm: LlmRunner,
   abortSignal: AbortSignal,
   model: string,
   environment: Environment,

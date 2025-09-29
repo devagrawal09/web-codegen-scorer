@@ -5,9 +5,11 @@ import { mkdtemp, readFile, rm, writeFile } from 'fs/promises';
 import { join, relative } from 'path';
 import { tmpdir } from 'os';
 import {
+  LlmConstrainedOutputGenerateRequestOptions,
   LlmConstrainedOutputGenerateResponse,
   LlmGenerateFilesRequestOptions,
   LlmGenerateFilesResponse,
+  LlmGenerateTextRequestOptions,
   LlmGenerateTextResponse,
   LlmRunner,
 } from '../llm-runner.js';
@@ -15,6 +17,12 @@ import { UserFacingError } from '../../utils/errors.js';
 import { DirectorySnapshot } from '../gemini-cli/directory-snapshot.js';
 import { getCodexAgentsFile } from './codex-files.js';
 import { LlmResponseFile } from '../../shared-interfaces.js';
+import { runCliCommand } from '../cli/run-command.js';
+import {
+  buildPromptFromMessages,
+  schemaToPrettyJson,
+  validateJsonAgainstSchema,
+} from '../cli/prompt-helpers.js';
 
 const DEFAULT_INACTIVITY_TIMEOUT_MINS = 2;
 const DEFAULT_TOTAL_TIMEOUT_MINS = 15;
@@ -105,7 +113,10 @@ export class CodexCliRunner implements LlmRunner {
     for (const [absolutePath, code] of diff) {
       const relativePath = relative(context.directory, absolutePath);
 
-      if (relativePath === 'AGENTS.md' || relativePath === '.codex-last-message.txt') {
+      if (
+        relativePath === 'AGENTS.md' ||
+        relativePath === '.codex-last-message.txt'
+      ) {
         continue;
       }
 
@@ -115,23 +126,68 @@ export class CodexCliRunner implements LlmRunner {
     const reasoning =
       runOutput?.reasoning && runOutput.reasoning.trim().length
         ? runOutput.reasoning.trim()
-        : runOutput?.stdout ?? '';
+        : (runOutput?.stdout ?? '');
 
     return { files, reasoning, toolLogs: [] };
   }
 
-  generateText(): Promise<LlmGenerateTextResponse> {
-    throw new UserFacingError(
-      'Generating text with Codex CLI is not supported.'
-    );
+  async generateText(
+    options: LlmGenerateTextRequestOptions
+  ): Promise<LlmGenerateTextResponse> {
+    const prompt = buildPromptFromMessages(options.messages, options.prompt);
+
+    if (!prompt.length) {
+      throw new UserFacingError('Prompt must not be empty for Codex CLI.');
+    }
+
+    const result = await this.runCodexExec({
+      model: options.model,
+      prompt,
+      abortSignal: options.abortSignal,
+      inactivityTimeoutMins: DEFAULT_INACTIVITY_TIMEOUT_MINS,
+      totalTimeoutMins: DEFAULT_TOTAL_TIMEOUT_MINS,
+    });
+
+    return {
+      text: result.message.trim(),
+      reasoning: '',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+      toolLogs: [],
+    } satisfies LlmGenerateTextResponse;
   }
 
-  generateConstrained(): Promise<
-    LlmConstrainedOutputGenerateResponse<any>
-  > {
-    throw new UserFacingError(
-      'Constrained output with Codex CLI is not supported.'
-    );
+  async generateConstrained(
+    options: LlmConstrainedOutputGenerateRequestOptions
+  ): Promise<LlmConstrainedOutputGenerateResponse<any>> {
+    const prompt = buildPromptFromMessages(options.messages, options.prompt);
+
+    if (!prompt.length) {
+      throw new UserFacingError('Prompt must not be empty for Codex CLI.');
+    }
+
+    const schemaJson = schemaToPrettyJson(options.schema);
+    const result = await this.runCodexExec({
+      model: options.model,
+      prompt,
+      abortSignal: options.abortSignal,
+      inactivityTimeoutMins: DEFAULT_INACTIVITY_TIMEOUT_MINS,
+      totalTimeoutMins: DEFAULT_TOTAL_TIMEOUT_MINS,
+      schemaJson,
+    });
+
+    const validation = validateJsonAgainstSchema(options.schema, result.message);
+
+    if (!validation.success) {
+      throw new UserFacingError(
+        `Codex CLI returned invalid JSON that does not match the schema.\n${validation.error}`
+      );
+    }
+
+    return {
+      output: validation.data,
+      reasoning: '',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    } satisfies LlmConstrainedOutputGenerateResponse<any>;
   }
 
   getSupportedModels(): string[] {
@@ -149,6 +205,61 @@ export class CodexCliRunner implements LlmRunner {
 
     this.pendingTimeouts.clear();
     this.pendingProcesses.clear();
+  }
+
+  private async runCodexExec(options: {
+    model: string;
+    prompt: string;
+    abortSignal?: AbortSignal;
+    inactivityTimeoutMins: number;
+    totalTimeoutMins: number;
+    schemaJson?: string;
+  }): Promise<{ message: string }> {
+    const codexHome = await mkdtemp(join(tmpdir(), 'codex-cli-runner-text-'));
+    const lastMessagePath = join(codexHome, 'last-message.json');
+    const args = [
+      'exec',
+      '--skip-git-repo-check',
+      '--model',
+      options.model,
+      '--output-last-message',
+      lastMessagePath,
+      '--color',
+      'never',
+    ];
+
+    let schemaPath: string | null = null;
+    if (options.schemaJson) {
+      schemaPath = join(codexHome, 'schema.json');
+      await writeFile(schemaPath, options.schemaJson, 'utf8');
+      args.push('--output-schema', schemaPath);
+    }
+
+    if (options.prompt.trim().length) {
+      args.push(options.prompt.trim());
+    }
+
+    try {
+      const result = await runCliCommand({
+        binaryPath: this.binaryPath,
+        args,
+        env: { CODEX_HOME: codexHome },
+        abortSignal: options.abortSignal,
+        inactivityTimeoutMs: options.inactivityTimeoutMins * 60 * 1000,
+        totalTimeoutMs: options.totalTimeoutMins * 60 * 1000,
+        pendingProcesses: this.pendingProcesses,
+        pendingTimeouts: this.pendingTimeouts,
+      });
+
+      if (existsSync(lastMessagePath)) {
+        const message = await readFile(lastMessagePath, 'utf8');
+        return { message };
+      }
+
+      return { message: result.stdout }; // Fallback for older CLI versions.
+    } finally {
+      await rm(codexHome, { recursive: true, force: true });
+    }
   }
 
   private resolveBinaryPath(): string {

@@ -12,7 +12,6 @@ import {
   writeReportToDisk,
 } from './reporting/report-logging.js';
 import { getRunnerByName, RunnerName } from './codegen/runner-creation.js';
-import { GenkitRunner } from './codegen/genkit/genkit-runner.js';
 import { UserFacingError } from './utils/errors.js';
 
 export const EvalModule = {
@@ -42,6 +41,7 @@ interface Options {
   enableAutoCsp?: boolean;
   autoraterModel?: string;
   logging?: 'text-only' | 'dynamic';
+  autoraterRunner?: RunnerName;
 }
 
 function builder(argv: Argv): Argv<Options> {
@@ -61,8 +61,24 @@ function builder(argv: Argv): Argv<Options> {
       .option('runner', {
         type: 'string',
         default: 'genkit' as const,
-        choices: ['genkit', 'gemini-cli', 'codex-cli', 'claude-code-cli'] as RunnerName[],
+        choices: [
+          'genkit',
+          'gemini-cli',
+          'codex-cli',
+          'claude-code-cli',
+        ] as RunnerName[],
         description: 'Runner to use to execute the eval',
+      })
+      .option('autorater-runner', {
+        type: 'string',
+        choices: [
+          'genkit',
+          'gemini-cli',
+          'codex-cli',
+          'claude-code-cli',
+        ] as RunnerName[],
+        description:
+          'Runner to use for the autorater and AI summary. Defaults to the main runner.',
       })
       .option('local', {
         type: 'boolean',
@@ -166,8 +182,11 @@ function builder(argv: Argv): Argv<Options> {
 }
 
 async function handler(cliArgs: Arguments<Options>): Promise<void> {
-  let llm: LlmRunner | null = null;
-  let ratingLlm: GenkitRunner | null = null;
+  let ratingLlm: LlmRunner | null = null;
+  const userSpecifiedModel = didUserSpecifyModel();
+  const selectedModel = userSpecifiedModel
+    ? cliArgs.model
+    : getDefaultModelForRunner(cliArgs.runner);
 
   if (!cliArgs.environment) {
     console.error(
@@ -184,11 +203,12 @@ async function handler(cliArgs: Arguments<Options>): Promise<void> {
   }
 
   try {
-    ratingLlm = await getRunnerByName('genkit');
+    const autoraterRunner = cliArgs.autoraterRunner || cliArgs.runner;
+    ratingLlm = await getRunnerByName(autoraterRunner);
     const runInfo = await generateCodeAndAssess({
       ratingLlm,
       runner: cliArgs.runner,
-      model: cliArgs.model,
+      model: selectedModel,
       environmentConfigPath:
         BUILT_IN_ENVIRONMENTS.get(cliArgs.environment) || cliArgs.environment,
       localMode: cliArgs.local,
@@ -225,4 +245,32 @@ async function handler(cliArgs: Arguments<Options>): Promise<void> {
   } finally {
     await ratingLlm?.dispose();
   }
+}
+
+function didUserSpecifyModel(): boolean {
+  return process.argv.slice(2).some((arg, index, args) => {
+    if (arg === '--model') {
+      return true;
+    }
+
+    if (arg.startsWith('--model=')) {
+      return true;
+    }
+
+    // Support "--model value" syntax even if the value is provided as a separate argument.
+    const previousArg = args[index - 1];
+    return previousArg === '--model';
+  });
+}
+
+function getDefaultModelForRunner(runner: RunnerName): string {
+  if (runner === 'claude-code-cli') {
+    return 'claude-4.5-sonnet';
+  }
+
+  if (runner === 'codex-cli') {
+    return 'gpt-5-codex';
+  }
+
+  return DEFAULT_MODEL_NAME;
 }

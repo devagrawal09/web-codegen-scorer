@@ -8,7 +8,7 @@ import type {
   Usage,
 } from '../shared-interfaces.js';
 import { Environment } from '../configuration/environment.js';
-import { GenkitRunner } from '../codegen/genkit/genkit-runner.js';
+import { LlmRunner } from '../codegen/llm-runner.js';
 import { ServeTestingResult } from '../workers/serve-testing/worker-types.js';
 
 /** Possible types of ratings. */
@@ -189,7 +189,7 @@ export interface LLMBasedRatingContext {
   environment: Environment;
   fullPromptText: string;
   currentPromptDef: PromptDefinition;
-  llm: GenkitRunner;
+  llm: LlmRunner;
   model: string;
   outputFiles: LlmResponseFile[];
   buildResult: BuildResult;

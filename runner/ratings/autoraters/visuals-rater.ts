@@ -5,7 +5,7 @@ import {
   getCoefficient,
   MAX_RATING,
 } from './auto-rate-shared.js';
-import { GenkitRunner } from '../../codegen/genkit/genkit-runner.js';
+import { LlmRunner } from '../../codegen/llm-runner.js';
 import defaultVisualRaterPrompt from './visual-rating-prompt.js';
 import { Environment } from '../../configuration/environment.js';
 import { screenshotUrlToPngBuffer } from '../../utils/screenshots.js';
@@ -21,7 +21,7 @@ import { screenshotUrlToPngBuffer } from '../../utils/screenshots.js';
  * @param label Label for the rating, used for logging.
  */
 export async function autoRateAppearance(
-  llm: GenkitRunner,
+  llm: LlmRunner,
   abortSignal: AbortSignal,
   model: string,
   environment: Environment,

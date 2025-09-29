@@ -24,7 +24,7 @@ import {
 } from './rating-types.js';
 import { extractEmbeddedCodeFromTypeScript } from './embedded-languages.js';
 import { Environment } from '../configuration/environment.js';
-import { GenkitRunner } from '../codegen/genkit/genkit-runner.js';
+import { LlmRunner } from '../codegen/llm-runner.js';
 import { ProgressLogger } from '../progress/progress-logger.js';
 import { UserFacingError } from '../utils/errors.js';
 import { ServeTestingResult } from '../workers/serve-testing/worker-types.js';
@@ -47,7 +47,7 @@ type CategorizedFiles = Record<
 >;
 
 export async function rateGeneratedCode(
-  llm: GenkitRunner,
+  llm: LlmRunner,
   environment: Environment,
   currentPromptDef: PromptDefinition,
   fullPromptText: string,
@@ -284,7 +284,7 @@ async function runLlmBasedRating(
   rating: LLMBasedRating,
   fullPromptText: string,
   currentPromptDef: PromptDefinition,
-  llm: GenkitRunner,
+  llm: LlmRunner,
   outputFiles: LlmResponseFile[],
   buildResult: BuildResult,
   serveTestingResult: ServeTestingResult | null,

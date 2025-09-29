@@ -1,6 +1,6 @@
 import { marked } from 'marked';
 import { BuildResultStatus } from '../workers/builder/builder-types.js';
-import { GenkitRunner } from '../codegen/genkit/genkit-runner.js';
+import { LlmRunner } from '../codegen/llm-runner.js';
 import {
   AssessmentResult,
   IndividualAssessment,
@@ -8,7 +8,7 @@ import {
 } from '../shared-interfaces.js';
 
 export async function summarizeReportWithAI(
-  llm: GenkitRunner,
+  llm: LlmRunner,
   abortSignal: AbortSignal,
   assessments: AssessmentResult[]
 ) {

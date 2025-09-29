@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LlmResponseFile, Usage } from '../shared-interfaces.js';
-import { GenkitRunner } from '../codegen/genkit/genkit-runner.js';
+import { LlmRunner } from '../codegen/llm-runner.js';
 import { UserFacingError } from '../utils/errors.js';
 
 // NOTE: When changing this, also change `browser-agent`'s prompt!
@@ -25,7 +25,7 @@ export interface UserJourneysResult {
 }
 
 export async function generateUserJourneysForApp(
-  llm: GenkitRunner,
+  llm: LlmRunner,
   appName: string,
   appPrompt: string,
   appFiles: LlmResponseFile[],

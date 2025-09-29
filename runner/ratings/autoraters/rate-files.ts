@@ -8,7 +8,7 @@ import {
 import { autoRateCode } from './code-rater.js';
 import { autoRateAppearance } from './visuals-rater.js';
 import { Environment } from '../../configuration/environment.js';
-import { GenkitRunner } from '../../codegen/genkit/genkit-runner.js';
+import { LlmRunner } from '../../codegen/llm-runner.js';
 import { RatingsResult } from '../rating-types.js';
 
 /**
@@ -22,7 +22,7 @@ import { RatingsResult } from '../rating-types.js';
  * @param ratingsResult Context containing results from previous ratings.
  */
 export async function autoRateFiles(
-  llm: GenkitRunner,
+  llm: LlmRunner,
   abortSignal: AbortSignal,
   model: string,
   environment: Environment,
