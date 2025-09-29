@@ -13,3 +13,5 @@ report-app/.vscode
 report-app/.reports
 
 .web-codegen-scorer
+
+.env.local
