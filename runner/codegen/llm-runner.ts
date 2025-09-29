@@ -3,6 +3,10 @@ import { LlmResponseFile, ToolLogEntry, Usage } from '../shared-interfaces.js';
 import { UserFacingError } from '../utils/errors.js';
 
 export function assertValidModelName(value: string, availableModels: string[]) {
+  if (availableModels.length === 0) {
+    return;
+  }
+
   if (!availableModels.includes(value)) {
     throw new UserFacingError(
       `Unsupported model specified. Available models:\n` +

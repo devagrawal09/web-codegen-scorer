@@ -34,6 +34,8 @@ export { groupSimilarReports } from './orchestration/grouping.js';
 export { type LlmRunner } from './codegen/llm-runner.js';
 export { GenkitRunner } from './codegen/genkit/genkit-runner.js';
 export { GeminiCliRunner } from './codegen/gemini-cli/gemini-cli-runner.js';
+export { CodexCliRunner } from './codegen/codex-cli/codex-cli-runner.js';
+export { ClaudeCodeCliRunner } from './codegen/claude-code-cli/claude-code-cli-runner.js';
 export { getRunnerByName, type RunnerName } from './codegen/runner-creation.js';
 export { getEnvironmentByPath } from './configuration/environment-resolution.js';
 export { type Environment } from './configuration/environment.js';

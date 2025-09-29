@@ -7,6 +7,8 @@ const exactMatches: Record<string, string> = {
   vue: 'frameworks/vue.svg',
   solid: 'frameworks/solid.svg',
   'gemini-cli': 'gemini.webp',
+  'codex-cli': 'open-ai.png',
+  'claude-code-cli': 'claude.png',
   genkit: 'genkit.png',
 };
 

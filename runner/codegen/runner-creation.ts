@@ -1,10 +1,14 @@
 import { UserFacingError } from '../utils/errors.js';
 import type { GeminiCliRunner } from './gemini-cli/gemini-cli-runner.js';
 import type { GenkitRunner } from './genkit/genkit-runner.js';
+import type { CodexCliRunner } from './codex-cli/codex-cli-runner.js';
+import type { ClaudeCodeCliRunner } from './claude-code-cli/claude-code-cli-runner.js';
 
 interface AvailableRunners {
   genkit: GenkitRunner;
   'gemini-cli': GeminiCliRunner;
+  'codex-cli': CodexCliRunner;
+  'claude-code-cli': ClaudeCodeCliRunner;
 }
 
 /** Names of supported runners. */
@@ -26,6 +30,14 @@ export async function getRunnerByName<T extends RunnerName>(
     case 'gemini-cli':
       return import('./gemini-cli/gemini-cli-runner.js').then(
         (m) => new m.GeminiCliRunner() as AvailableRunners[T]
+      );
+    case 'codex-cli':
+      return import('./codex-cli/codex-cli-runner.js').then(
+        (m) => new m.CodexCliRunner() as AvailableRunners[T]
+      );
+    case 'claude-code-cli':
+      return import('./claude-code-cli/claude-code-cli-runner.js').then(
+        (m) => new m.ClaudeCodeCliRunner() as AvailableRunners[T]
       );
     default:
       throw new UserFacingError(`Unsupported runner ${name}`);
