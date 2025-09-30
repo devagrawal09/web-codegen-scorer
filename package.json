@@ -11,7 +11,8 @@
     "init": "pnpm web-codegen-scorer init",
     "report": "cd report-app && CODEGEN_REPORTS_DIR=../.web-codegen-scorer/reports pnpm start",
     "format": "prettier --write \"runner/**/*.ts\" \"report-app/**/*.ts\" \"*.json\"",
-    "check-format": "prettier --check \"runner/**/*.ts\" \"report-app/**/*.ts\" \"*.json\""
+    "check-format": "prettier --check \"runner/**/*.ts\" \"report-app/**/*.ts\" \"*.json\"",
+    "smoke-cli": "tsx ./scripts/smoke/smoke-cli.ts"
   },
   "keywords": [
     "codegen",

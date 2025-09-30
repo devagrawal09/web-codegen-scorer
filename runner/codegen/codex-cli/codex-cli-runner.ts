@@ -178,8 +178,19 @@ export class CodexCliRunner implements LlmRunner {
     const validation = validateJsonAgainstSchema(options.schema, result.message);
 
     if (!validation.success) {
+      const rawOutput = validation.raw ?? result.message;
+      const commandInfo = `Command: ${this.binaryPath} ${result.args.join(' ')}`;
+      const outputInfo = `CLI stdout:\n${result.stdout.trim() || '<empty>'}\nCLI stderr:\n${
+        result.stderr.trim() || '<empty>'
+      }`;
       throw new UserFacingError(
-        `Codex CLI returned invalid JSON that does not match the schema.\n${validation.error}`
+        [
+          'Codex CLI returned invalid JSON that does not match the schema.',
+          validation.error,
+          `Raw output: ${rawOutput?.trim() || '<empty>'}`,
+          commandInfo,
+          outputInfo,
+        ].join('\n')
       );
     }
 
@@ -214,7 +225,12 @@ export class CodexCliRunner implements LlmRunner {
     inactivityTimeoutMins: number;
     totalTimeoutMins: number;
     schemaJson?: string;
-  }): Promise<{ message: string }> {
+  }): Promise<{
+    message: string;
+    args: string[];
+    stdout: string;
+    stderr: string;
+  }> {
     const codexHome = await mkdtemp(join(tmpdir(), 'codex-cli-runner-text-'));
     const lastMessagePath = join(codexHome, 'last-message.json');
     const args = [
@@ -253,10 +269,20 @@ export class CodexCliRunner implements LlmRunner {
 
       if (existsSync(lastMessagePath)) {
         const message = await readFile(lastMessagePath, 'utf8');
-        return { message };
+        return {
+          message,
+          args,
+          stdout: result.stdout,
+          stderr: result.stderr,
+        };
       }
 
-      return { message: result.stdout }; // Fallback for older CLI versions.
+      return {
+        message: result.stdout,
+        args,
+        stdout: result.stdout,
+        stderr: result.stderr,
+      }; // Fallback for older CLI versions.
     } finally {
       await rm(codexHome, { recursive: true, force: true });
     }

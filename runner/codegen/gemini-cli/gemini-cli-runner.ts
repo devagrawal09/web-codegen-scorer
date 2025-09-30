@@ -139,7 +139,7 @@ export class GeminiCliRunner implements LlmRunner {
     });
 
     return {
-      text: response.trim(),
+      text: response.output.trim(),
       reasoning: '',
       usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
       toolLogs: [],
@@ -160,6 +160,12 @@ export class GeminiCliRunner implements LlmRunner {
     let attempt = 0;
     let lastOutput: string | undefined;
     let lastError: string | undefined;
+    let lastResponse: {
+      output: string;
+      args: string[];
+      stdout: string;
+      stderr: string;
+    } | null = null;
 
     while (attempt < MAX_SCHEMA_RETRIES) {
       if (options.abortSignal?.aborted) {
@@ -182,8 +188,9 @@ export class GeminiCliRunner implements LlmRunner {
         inactivityTimeoutMins: TEXT_INACTIVITY_TIMEOUT_MINS,
         totalTimeoutMins: totalTimeout,
       });
+      lastResponse = response;
 
-      const validation = validateJsonAgainstSchema(options.schema, response);
+      const validation = validateJsonAgainstSchema(options.schema, response.output);
 
       if (validation.success) {
         return {
@@ -194,12 +201,27 @@ export class GeminiCliRunner implements LlmRunner {
       }
 
       lastError = validation.error;
-      lastOutput = validation.raw ?? response;
+      lastOutput = validation.raw ?? response.output;
       attempt++;
     }
 
+    const commandInfo = lastResponse
+      ? `Command: ${this.binaryPath} ${lastResponse.args.join(' ')}`
+      : 'Command: <unknown>';
+    const outputInfo = lastResponse
+      ? `CLI stdout:\n${lastResponse.stdout.trim() || '<empty>'}\nCLI stderr:\n${
+          lastResponse.stderr.trim() || '<empty>'
+        }`
+      : 'CLI output unavailable.';
+
     throw new UserFacingError(
-      `Gemini CLI failed to produce JSON matching the schema after ${MAX_SCHEMA_RETRIES} attempts. Last error: ${lastError ?? 'unknown error.'}`
+      [
+        `Gemini CLI failed to produce JSON matching the schema after ${MAX_SCHEMA_RETRIES} attempts.`,
+        `Last error: ${lastError ?? 'unknown error.'}`,
+        `Raw output: ${lastOutput?.trim() || '<empty>'}`,
+        commandInfo,
+        outputInfo,
+      ].join('\n')
     );
   }
 
@@ -227,20 +249,18 @@ export class GeminiCliRunner implements LlmRunner {
     abortSignal?: AbortSignal;
     inactivityTimeoutMins: number;
     totalTimeoutMins: number;
-  }): Promise<string> {
+  }): Promise<{
+    output: string;
+    args: string[];
+    stdout: string;
+    stderr: string;
+  }> {
     const promptValue = options.prompt.trim();
     if (!promptValue.length) {
-      return '';
+      return { output: '', args: [], stdout: '', stderr: '' };
     }
 
-    const args = [
-      '-p',
-      promptValue,
-      '-m',
-      options.model,
-      '--output-format',
-      options.outputFormat,
-    ];
+    const args = ['-m', options.model, promptValue];
 
     const result = await runCliCommand({
       binaryPath: this.binaryPath,
@@ -253,11 +273,14 @@ export class GeminiCliRunner implements LlmRunner {
     });
 
     const stdout = result.stdout.trim();
-    if (stdout.length) {
-      return stdout;
-    }
+    const mergedOutput = stdout.length ? stdout : result.stderr.trim();
 
-    return result.stderr.trim();
+    return {
+      output: mergedOutput,
+      args,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    };
   }
 
   private resolveBinaryPath(): string {
