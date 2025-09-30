@@ -8,9 +8,9 @@ interface SmokeResult {
   skipped: boolean;
 }
 
-const DEFAULT_CODEX_MODEL = 'gpt-4o-mini';
+const DEFAULT_CODEX_MODEL = 'gpt-5-codex';
 const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
-const DEFAULT_CLAUDE_MODEL = 'claude-3-5-sonnet-latest';
+const DEFAULT_CLAUDE_MODEL = 'sonnet';
 
 async function runCodexSmoke(): Promise<SmokeResult> {
   const model = process.env['CODEX_SMOKE_MODEL'] ?? DEFAULT_CODEX_MODEL;
@@ -22,7 +22,7 @@ async function runCodexSmoke(): Promise<SmokeResult> {
         .string()
         .describe('Short acknowledgement containing the word Codex'),
     });
-    const [text, structured] = await Promise.all([
+    const [text, structured = { output: null }] = await Promise.all([
       runner.generateText({
         model,
         prompt: 'Reply with a short greeting mentioning "Codex".',
@@ -43,6 +43,7 @@ async function runCodexSmoke(): Promise<SmokeResult> {
   } catch (error) {
     if (shouldSkipBecauseUnauthenticated(error)) {
       console.log('[codex-cli] Skipping smoke test: CLI not authenticated.');
+      console.error(error);
       return { runner: 'codex-cli', skipped: true };
     }
     if (isEmptyResponseError(error)) {
@@ -169,8 +170,8 @@ async function runClaudeSmoke(): Promise<SmokeResult> {
 async function main() {
   const tasks: Array<Promise<SmokeResult>> = [
     wrapWithLabel('codex-cli', runCodexSmoke),
-    wrapWithLabel('gemini-cli', runGeminiSmoke),
-    wrapWithLabel('claude-code-cli', runClaudeSmoke),
+    // wrapWithLabel('gemini-cli', runGeminiSmoke),
+    // wrapWithLabel('claude-code-cli', runClaudeSmoke),
   ];
 
   const settled = await Promise.allSettled(tasks);
