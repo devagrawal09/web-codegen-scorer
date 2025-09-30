@@ -9,6 +9,7 @@ import {
 
 export async function summarizeReportWithAI(
   llm: LlmRunner,
+  model: string,
   abortSignal: AbortSignal,
   assessments: AssessmentResult[]
 ) {
@@ -42,7 +43,7 @@ Categorize the failures and provide a brief summary of the report. Keep it short
 
   const result = await llm.generateText({
     prompt: prompt,
-    model: 'gemini-2.5-flash-lite',
+    model: model,
     timeout: {
       description: `Generating summary for report`,
       durationInMins: 3,

@@ -117,7 +117,8 @@ export class ClaudeCodeCliRunner implements LlmRunner {
       );
     }
 
-    const totalTimeout = options.timeout?.durationInMins ?? TEXT_TOTAL_TIMEOUT_MINS;
+    const totalTimeout =
+      options.timeout?.durationInMins ?? TEXT_TOTAL_TIMEOUT_MINS;
     const response = await this.runClaudePrompt({
       model: options.model,
       prompt,
@@ -137,7 +138,10 @@ export class ClaudeCodeCliRunner implements LlmRunner {
   async generateConstrained(
     options: LlmConstrainedOutputGenerateRequestOptions
   ): Promise<LlmConstrainedOutputGenerateResponse<any>> {
-    const basePrompt = buildPromptFromMessages(options.messages, options.prompt);
+    const basePrompt = buildPromptFromMessages(
+      options.messages,
+      options.prompt
+    );
 
     if (!basePrompt.length) {
       throw new UserFacingError(
@@ -146,7 +150,8 @@ export class ClaudeCodeCliRunner implements LlmRunner {
     }
 
     const schemaJson = schemaToPrettyJson(options.schema);
-    const totalTimeout = options.timeout?.durationInMins ?? TEXT_TOTAL_TIMEOUT_MINS;
+    const totalTimeout =
+      options.timeout?.durationInMins ?? TEXT_TOTAL_TIMEOUT_MINS;
     let attempt = 0;
     let lastOutput: string | undefined;
     let lastError: string | undefined;
@@ -180,7 +185,10 @@ export class ClaudeCodeCliRunner implements LlmRunner {
 
       lastResponse = response;
 
-      const validation = validateJsonAgainstSchema(options.schema, response.output);
+      const validation = validateJsonAgainstSchema(
+        options.schema,
+        response.output
+      );
 
       if (validation.success) {
         return {
@@ -216,7 +224,8 @@ export class ClaudeCodeCliRunner implements LlmRunner {
   }
 
   getSupportedModels(): string[] {
-    return [];
+    // CLI `--model` flag accepts aliases (e.g. "sonnet") or full IDs.
+    return ['sonnet', 'haiku'];
   }
 
   async dispose(): Promise<void> {
@@ -249,7 +258,9 @@ export class ClaudeCodeCliRunner implements LlmRunner {
       return { output: '', args: [], stdout: '', stderr: '' };
     }
 
-    const claudeHome = await mkdtemp(join(tmpdir(), 'claude-code-runner-text-'));
+    const claudeHome = await mkdtemp(
+      join(tmpdir(), 'claude-code-runner-text-')
+    );
     const args = [
       '--print',
       '--output-format',

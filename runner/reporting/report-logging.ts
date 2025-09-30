@@ -6,10 +6,7 @@ import {
   RunInfo,
   ScoreBucket,
 } from '../shared-interfaces.js';
-import {
-  DEFAULT_AUTORATER_MODEL_NAME,
-  REPORTS_ROOT_DIR,
-} from '../configuration/constants.js';
+import { REPORTS_ROOT_DIR } from '../configuration/constants.js';
 import { calculateBuildAndCheckStats } from '../ratings/stats.js';
 import { safeWriteFile } from '../file-system-utils.js';
 import { BuildResultStatus } from '../workers/builder/builder-types.js';
@@ -172,10 +169,7 @@ export function logReportHeader(
     '',
     ` - Environment: ${env.displayName}`,
     ` - Model: ${options.model}`,
-    options.autoraterModel &&
-    options.autoraterModel !== DEFAULT_AUTORATER_MODEL_NAME
-      ? ` - Autorater model: ${options.autoraterModel}`
-      : null,
+    ` - Autorater model: ${options.autoraterModel}`,
     ` - Runner: ${env instanceof LocalEnvironment ? env.llm.displayName : 'Remote'}`,
     env instanceof LocalEnvironment
       ? ` - MCP servers: ${options.startMcp && env.mcpServerOptions.length ? env.mcpServerOptions.length : 'none'}`

@@ -11,11 +11,7 @@ import {
   LlmGenerateFilesResponse,
   LlmRunner,
 } from '../codegen/llm-runner.js';
-import {
-  DEFAULT_AUTORATER_MODEL_NAME,
-  LLM_OUTPUT_DIR,
-  REPORT_VERSION,
-} from '../configuration/constants.js';
+import { LLM_OUTPUT_DIR, REPORT_VERSION } from '../configuration/constants.js';
 import { Environment } from '../configuration/environment.js';
 import { rateGeneratedCode } from '../ratings/rate-code.js';
 import { summarizeReportWithAI } from '../reporting/ai-summarize.js';
@@ -89,7 +85,7 @@ export async function generateCodeAndAssess(options: {
   enableUserJourneyTesting?: boolean;
   enableAutoCsp?: boolean;
   logging?: 'text-only' | 'dynamic';
-  autoraterModel?: string;
+  autoraterModel: string;
 }): Promise<RunInfo> {
   const env = await getEnvironmentByPath(
     options.environmentConfigPath,
@@ -98,6 +94,8 @@ export async function generateCodeAndAssess(options: {
 
   // TODO(devversion): Consider validating model names also for remote environments.
   if (env instanceof LocalEnvironment) {
+    console.log('options.model', options.model);
+    console.log('env.llm.getSupportedModels()', env.llm.getSupportedModels());
     assertValidModelName(options.model, env.llm.getSupportedModels());
   }
 
@@ -191,7 +189,7 @@ export async function generateCodeAndAssess(options: {
                     !!options.enableAutoCsp,
                     workerConcurrencyQueue,
                     progress,
-                    options.autoraterModel || DEFAULT_AUTORATER_MODEL_NAME
+                    options.autoraterModel
                   ),
                 // 10min max per app evaluation.  We just want to make sure it never gets stuck.
                 10
@@ -664,6 +662,7 @@ async function prepareSummary(
     try {
       const result = await summarizeReportWithAI(
         llm,
+        model,
         abortSignal,
         assessments
       );

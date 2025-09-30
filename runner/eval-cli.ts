@@ -1,11 +1,7 @@
 import { Arguments, Argv, CommandModule } from 'yargs';
 import chalk from 'chalk';
-import { assertValidModelName, LlmRunner } from './codegen/llm-runner.js';
-import {
-  BUILT_IN_ENVIRONMENTS,
-  DEFAULT_AUTORATER_MODEL_NAME,
-  DEFAULT_MODEL_NAME,
-} from './configuration/constants.js';
+import { LlmRunner } from './codegen/llm-runner.js';
+import { BUILT_IN_ENVIRONMENTS } from './configuration/constants.js';
 import { generateCodeAndAssess } from './orchestration/generate.js';
 import {
   logReportToConsole,
@@ -23,7 +19,7 @@ export const EvalModule = {
 
 interface Options {
   environment?: string;
-  model: string;
+  model?: string;
   runner: RunnerName;
   local: boolean;
   limit: number;
@@ -54,8 +50,7 @@ function builder(argv: Argv): Argv<Options> {
       })
       .option('model', {
         type: 'string',
-        default: DEFAULT_MODEL_NAME,
-        descript: 'Model to use when generating code',
+        description: 'Model to use when generating code',
       })
       // Option is a noop right now when using a remote environment.
       .option('runner', {
@@ -171,7 +166,6 @@ function builder(argv: Argv): Argv<Options> {
       })
       .option('autorater-model', {
         type: 'string',
-        default: DEFAULT_AUTORATER_MODEL_NAME,
         description: 'Model to use when automatically rating generated code',
       })
       .strict()
@@ -185,7 +179,7 @@ async function handler(cliArgs: Arguments<Options>): Promise<void> {
   let ratingLlm: LlmRunner | null = null;
   const userSpecifiedModel = didUserSpecifyModel();
   const selectedModel = userSpecifiedModel
-    ? cliArgs.model
+    ? cliArgs.model || getDefaultModelForRunner(cliArgs.runner)
     : getDefaultModelForRunner(cliArgs.runner);
 
   if (!cliArgs.environment) {
@@ -205,6 +199,8 @@ async function handler(cliArgs: Arguments<Options>): Promise<void> {
   try {
     const autoraterRunner = cliArgs.autoraterRunner || cliArgs.runner;
     ratingLlm = await getRunnerByName(autoraterRunner);
+    const resolvedAutoraterModel =
+      cliArgs.autoraterModel || getDefaultAutoraterModelForRunner(ratingLlm);
     const runInfo = await generateCodeAndAssess({
       ratingLlm,
       runner: cliArgs.runner,
@@ -225,7 +221,7 @@ async function handler(cliArgs: Arguments<Options>): Promise<void> {
       enableUserJourneyTesting: cliArgs.enableUserJourneyTesting,
       enableAutoCsp: cliArgs.enableAutoCsp,
       logging: cliArgs.logging,
-      autoraterModel: cliArgs.autoraterModel,
+      autoraterModel: resolvedAutoraterModel,
     });
 
     logReportToConsole(runInfo);
@@ -265,12 +261,21 @@ function didUserSpecifyModel(): boolean {
 
 function getDefaultModelForRunner(runner: RunnerName): string {
   if (runner === 'claude-code-cli') {
-    return 'claude-4.5-sonnet';
+    return 'sonnet';
   }
 
   if (runner === 'codex-cli') {
     return 'gpt-5-codex';
   }
 
-  return DEFAULT_MODEL_NAME;
+  if (runner === 'gemini-cli') {
+    return 'gemini-2.5-pro';
+  }
+
+  return 'gemini-2.5-pro';
+}
+
+function getDefaultAutoraterModelForRunner(llm: LlmRunner): string {
+  const supported = llm.getSupportedModels();
+  return supported[0];
 }

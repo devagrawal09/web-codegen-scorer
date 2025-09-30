@@ -3,20 +3,6 @@ import { join } from 'path';
 // Extracted out for convenience, do NOT export.
 const rootDir = join(process.cwd(), '.web-codegen-scorer');
 
-/**
- * Name of the model to use by default.
- *
- * See https://ai.google.dev/gemini-api/docs/models.
- */
-export const DEFAULT_MODEL_NAME = 'gemini-2.5-pro'; // slower than `flash`, but likely better
-
-/**
- * Name of the model to use by default for Autorater.
- *
- * See https://ai.google.dev/gemini-api/docs/models.
- */
-export const DEFAULT_AUTORATER_MODEL_NAME = 'gemini-2.5-flash'; // use less expensive model
-
 /** Name of the root folder where we store LLM-generated code for debugging */
 export const LLM_OUTPUT_DIR = join(rootDir, 'llm-output');
 

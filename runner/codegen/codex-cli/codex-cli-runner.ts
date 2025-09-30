@@ -205,7 +205,9 @@ export class CodexCliRunner implements LlmRunner {
   }
 
   getSupportedModels(): string[] {
-    return [];
+    // Codex CLI accepts any Chat Completions model via `--model`. The defaults
+    // listed in `codex --help` and the release notes cover these aliases.
+    return ['gpt-5-codex', 'gpt-4.1-mini', 'gpt-4o-mini', 'o3-mini'];
   }
 
   async dispose(): Promise<void> {
