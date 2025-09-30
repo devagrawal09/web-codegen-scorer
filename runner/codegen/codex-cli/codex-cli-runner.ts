@@ -249,7 +249,6 @@ export class CodexCliRunner implements LlmRunner {
 
     let schemaPath: string | null = null;
     if (options.schemaJson) {
-      console.log('Schema JSON:', options.schemaJson);
       schemaPath = join(codexHome, 'schema.json');
       await writeFile(schemaPath, options.schemaJson, 'utf8');
       args.push('--output-schema', schemaPath);
@@ -260,8 +259,6 @@ export class CodexCliRunner implements LlmRunner {
     }
 
     try {
-      const randomId = Math.random().toString(36).substring(2, 15);
-      console.log({ randomId, args });
       const result = await runCliCommand({
         binaryPath: this.binaryPath,
         args,
@@ -272,11 +269,8 @@ export class CodexCliRunner implements LlmRunner {
         pendingTimeouts: this.pendingTimeouts,
       });
 
-      console.log({ randomId, result });
-
       if (existsSync(lastMessagePath)) {
         const message = await readFile(lastMessagePath, 'utf8');
-        console.log('Last message:', message);
         return {
           message,
           args,

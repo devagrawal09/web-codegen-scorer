@@ -170,8 +170,8 @@ async function runClaudeSmoke(): Promise<SmokeResult> {
 async function main() {
   const tasks: Array<Promise<SmokeResult>> = [
     wrapWithLabel('codex-cli', runCodexSmoke),
-    // wrapWithLabel('gemini-cli', runGeminiSmoke),
-    // wrapWithLabel('claude-code-cli', runClaudeSmoke),
+    wrapWithLabel('gemini-cli', runGeminiSmoke),
+    wrapWithLabel('claude-code-cli', runClaudeSmoke),
   ];
 
   const settled = await Promise.allSettled(tasks);

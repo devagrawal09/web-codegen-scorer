@@ -36,7 +36,12 @@ export function buildPromptFromMessages(
 
 export function schemaToPrettyJson(schema: z.ZodTypeAny): string {
   const jsonSchema = zodToJsonSchema(schema as any, 'Response');
-  return JSON.stringify(jsonSchema, null, 2);
+  const definition =
+    (jsonSchema.definitions && jsonSchema.definitions['Response']) || jsonSchema;
+  const objectSchema = definition && typeof definition === 'object'
+    ? definition
+    : jsonSchema;
+  return JSON.stringify(objectSchema, null, 2);
 }
 
 export function buildSchemaFollowUpPrompt(options: {
